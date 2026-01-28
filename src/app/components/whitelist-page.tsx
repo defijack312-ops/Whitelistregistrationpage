@@ -6,7 +6,7 @@ import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { PasscodeGate } from '@/app/components/passcode-gate';
 import { PrivyDiagnostic } from '@/app/components/privy-diagnostic';
 import { WHITELIST_CONFIG, validatePasscode, markCodeAsUsed } from '@/app/components/whitelist-config';
-import { projectId, publicAnonKey } from '@/../../utils/supabase/info';
+import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 
 interface FormData {
