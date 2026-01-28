@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Key, Lock, AlertCircle } from 'lucide-react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
-import celebrationPhoto from 'figma:asset/22d38cdb81634df90e212ab30714ca33af80c11d.png';
+import celebrationPhoto from '@/assets/22d38cdb81634df90e212ab30714ca33af80c11d.png';
 
 interface PasscodeGateProps {
   onSuccess: (code: string) => void;
