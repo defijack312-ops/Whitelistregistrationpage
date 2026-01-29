@@ -195,17 +195,29 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
         });
         
         const result = await response.json();
+        console.log('Quote RPC result:', result);
+        
         if (result.result && result.result !== '0x' && result.result.length > 2) {
           // Decode the result using viem
-          const amounts = decodeFunctionResult({
+          const decoded = decodeFunctionResult({
             abi: AERODROME_ROUTER_ABI,
             functionName: 'getAmountsOut',
             data: result.result
-          }) as bigint[];
+          });
           
-          // amounts = [inputAmount, afterHop1, afterHop2(MERC)]
-          const mercAmount = amounts[amounts.length - 1];
+          console.log('Decoded amounts:', decoded);
+          
+          // viem returns the array directly or wrapped - handle both cases
+          const amounts = Array.isArray(decoded) ? decoded : (decoded as any).amounts || decoded;
+          const amountsArray = Array.isArray(amounts[0]) ? amounts[0] : amounts;
+          
+          console.log('Amounts array:', amountsArray);
+          
+          // amounts = [inputAmount, afterHop1(USDC), afterHop2(MERC)]
+          const mercAmount = amountsArray[amountsArray.length - 1] as bigint;
           const mercFormatted = Number(mercAmount) / 1e18;
+          
+          console.log('MERC amount:', mercAmount, 'formatted:', mercFormatted);
           
           if (mercFormatted > 0) {
             setEstimatedMerc(mercFormatted.toLocaleString(undefined, { maximumFractionDigits: 2 }));
@@ -213,6 +225,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
             setSwapError('No liquidity available');
           }
         } else {
+          console.log('Quote failed - result:', result);
           setSwapError('Unable to get quote');
         }
       } catch (error) {
