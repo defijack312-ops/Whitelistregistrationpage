@@ -11,54 +11,85 @@ const MERC_CONTRACT_ADDRESS = '0x8923947EAfaf4aD68F1f0C9eb5463eC876D79058';
 const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const MERC_DECIMALS = 18;
+const USDC_DECIMALS = 6;
 
-// Aerodrome contracts on Base Mainnet
-const AERODROME_ROUTER = '0xcF77a3Ba9A5CA399B7c97c74d54e5b1Beb874E43';
-const AERODROME_FACTORY = '0x420DD381b31aEf6683db6B902084cB0FFECe40Da';
+// Aerodrome Slipstream contracts on Base Mainnet
+const SLIPSTREAM_QUOTER = '0x254cF9E1E6e233aa1AC962CB9B05b2cfeAaE15b0';
+const SLIPSTREAM_ROUTER = '0xBE6D8f0d05cC4Be24d5167a3eF062215bE6D18a5';
 
-// Aerodrome Router ABI (only the functions we need)
-const AERODROME_ROUTER_ABI = [
+// Pool tick spacings (from DEXscreener)
+const WETH_USDC_TICK_SPACING = 100;  // CL100 pool
+const USDC_MERC_TICK_SPACING = 2000; // CL2000 pool
+
+// Slipstream QuoterV2 ABI
+const SLIPSTREAM_QUOTER_ABI = [
   {
-    name: 'getAmountsOut',
+    name: 'quoteExactInput',
     type: 'function',
-    stateMutability: 'view',
+    stateMutability: 'nonpayable',
     inputs: [
-      { name: 'amountIn', type: 'uint256' },
-      {
-        name: 'routes',
-        type: 'tuple[]',
-        components: [
-          { name: 'from', type: 'address' },
-          { name: 'to', type: 'address' },
-          { name: 'stable', type: 'bool' },
-          { name: 'factory', type: 'address' }
-        ]
-      }
+      { name: 'path', type: 'bytes' },
+      { name: 'amountIn', type: 'uint256' }
     ],
-    outputs: [{ name: 'amounts', type: 'uint256[]' }]
-  },
+    outputs: [
+      { name: 'amountOut', type: 'uint256' },
+      { name: 'sqrtPriceX96AfterList', type: 'uint160[]' },
+      { name: 'initializedTicksCrossedList', type: 'uint32[]' },
+      { name: 'gasEstimate', type: 'uint256' }
+    ]
+  }
+] as const;
+
+// Slipstream SwapRouter ABI
+const SLIPSTREAM_ROUTER_ABI = [
   {
-    name: 'swapExactETHForTokens',
+    name: 'exactInput',
     type: 'function',
     stateMutability: 'payable',
     inputs: [
-      { name: 'amountOutMin', type: 'uint256' },
       {
-        name: 'routes',
-        type: 'tuple[]',
+        name: 'params',
+        type: 'tuple',
         components: [
-          { name: 'from', type: 'address' },
-          { name: 'to', type: 'address' },
-          { name: 'stable', type: 'bool' },
-          { name: 'factory', type: 'address' }
+          { name: 'path', type: 'bytes' },
+          { name: 'recipient', type: 'address' },
+          { name: 'deadline', type: 'uint256' },
+          { name: 'amountIn', type: 'uint256' },
+          { name: 'amountOutMinimum', type: 'uint256' }
         ]
-      },
-      { name: 'to', type: 'address' },
-      { name: 'deadline', type: 'uint256' }
+      }
     ],
-    outputs: [{ name: 'amounts', type: 'uint256[]' }]
+    outputs: [{ name: 'amountOut', type: 'uint256' }]
+  },
+  {
+    name: 'unwrapWETH9',
+    type: 'function',
+    stateMutability: 'payable',
+    inputs: [
+      { name: 'amountMinimum', type: 'uint256' },
+      { name: 'recipient', type: 'address' }
+    ],
+    outputs: []
+  },
+  {
+    name: 'multicall',
+    type: 'function',
+    stateMutability: 'payable',
+    inputs: [{ name: 'data', type: 'bytes[]' }],
+    outputs: [{ name: 'results', type: 'bytes[]' }]
   }
 ] as const;
+
+// Helper to encode swap path for Slipstream (token + tickSpacing + token + tickSpacing + token)
+function encodeSlipstreamPath(tokens: string[], tickSpacings: number[]): `0x${string}` {
+  let path = tokens[0].slice(2); // Remove 0x from first token
+  for (let i = 0; i < tickSpacings.length; i++) {
+    // Encode tick spacing as 3 bytes (int24)
+    const tickHex = (tickSpacings[i] & 0xFFFFFF).toString(16).padStart(6, '0');
+    path += tickHex + tokens[i + 1].slice(2);
+  }
+  return `0x${path}` as `0x${string}`;
+}
 
 interface WalletDashboardProps {
   userEmail?: string;
@@ -68,21 +99,11 @@ interface WalletDashboardProps {
   xVerified?: boolean;
 }
 
-// Define the routes for 2-hop swap: WETH -> USDC -> MERC
-const SWAP_ROUTES = [
-  {
-    from: WETH_ADDRESS as `0x${string}`,
-    to: USDC_ADDRESS as `0x${string}`,
-    stable: false,
-    factory: AERODROME_FACTORY as `0x${string}`
-  },
-  {
-    from: USDC_ADDRESS as `0x${string}`,
-    to: MERC_CONTRACT_ADDRESS as `0x${string}`,
-    stable: false,
-    factory: AERODROME_FACTORY as `0x${string}`
-  }
-] as const;
+// Build the Slipstream swap path: WETH -> USDC -> MERC
+const SWAP_PATH = encodeSlipstreamPath(
+  [WETH_ADDRESS, USDC_ADDRESS, MERC_CONTRACT_ADDRESS],
+  [WETH_USDC_TICK_SPACING, USDC_MERC_TICK_SPACING]
+);
 
 export function WalletDashboard({ userEmail, registrationDate, status = 'pending', xProfile: initialXProfile, xVerified: initialXVerified = false }: WalletDashboardProps) {
   const { logout, exportWallet, user, linkTwitter } = usePrivy();
@@ -168,7 +189,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
     return () => clearInterval(interval);
   }, [address]);
 
-  // Get 2-hop swap quote (ETH -> USDC -> MERC)
+  // Get 2-hop swap quote via Slipstream QuoterV2 (ETH -> USDC -> MERC)
   useEffect(() => {
     const getQuote = async () => {
       if (!swapAmount || parseFloat(swapAmount) <= 0) {
@@ -181,43 +202,41 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
       try {
         const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * 1e18));
         
-        // Use viem to properly encode the getAmountsOut call with struct array
+        // Use Slipstream QuoterV2 quoteExactInput
         const data = encodeFunctionData({
-          abi: AERODROME_ROUTER_ABI,
-          functionName: 'getAmountsOut',
-          args: [amountInWei, SWAP_ROUTES]
+          abi: SLIPSTREAM_QUOTER_ABI,
+          functionName: 'quoteExactInput',
+          args: [SWAP_PATH, amountInWei]
         });
+        
+        console.log('Slipstream quote path:', SWAP_PATH);
+        console.log('Amount in wei:', amountInWei.toString());
         
         const response = await fetch('https://mainnet.base.org', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: AERODROME_ROUTER, data }, 'latest'] })
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: SLIPSTREAM_QUOTER, data }, 'latest'] })
         });
         
         const result = await response.json();
-        console.log('Quote RPC result:', result);
+        console.log('Slipstream quote RPC result:', result);
         
         if (result.result && result.result !== '0x' && result.result.length > 2) {
           // Decode the result using viem
           const decoded = decodeFunctionResult({
-            abi: AERODROME_ROUTER_ABI,
-            functionName: 'getAmountsOut',
+            abi: SLIPSTREAM_QUOTER_ABI,
+            functionName: 'quoteExactInput',
             data: result.result
           });
           
-          console.log('Decoded amounts:', decoded);
+          console.log('Decoded quote result:', decoded);
           
-          // viem returns the array directly or wrapped - handle both cases
-          const amounts = Array.isArray(decoded) ? decoded : (decoded as any).amounts || decoded;
-          const amountsArray = Array.isArray(amounts[0]) ? amounts[0] : amounts;
-          
-          console.log('Amounts array:', amountsArray);
-          
-          // amounts = [inputAmount, afterHop1(USDC), afterHop2(MERC)]
-          const mercAmount = amountsArray[amountsArray.length - 1] as bigint;
+          // quoteExactInput returns: (amountOut, sqrtPriceX96AfterList, initializedTicksCrossedList, gasEstimate)
+          const amountOut = (decoded as any)[0] || decoded;
+          const mercAmount = typeof amountOut === 'bigint' ? amountOut : BigInt(amountOut);
           const mercFormatted = Number(mercAmount) / (10 ** MERC_DECIMALS);
           
-          console.log('MERC amount raw:', mercAmount, 'MERC decimals:', MERC_DECIMALS, 'formatted:', mercFormatted);
+          console.log('MERC amount raw:', mercAmount.toString(), 'formatted:', mercFormatted);
           
           if (mercAmount > 0n) {
             // Format based on size - show more decimals for small amounts
@@ -295,18 +314,24 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
       const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * 1e18));
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
       const estimatedOut = parseFloat(estimatedMerc.replace(/,/g, ''));
-      const minOut = BigInt(Math.floor(estimatedOut * 0.96 * 1e18)); // 4% slippage
+      const minOut = BigInt(Math.floor(estimatedOut * 0.90 * (10 ** MERC_DECIMALS))); // 10% slippage for low liquidity
       
-      // Use viem to properly encode the swapExactETHForTokens call
+      // Use Slipstream Router exactInput
       const data = encodeFunctionData({
-        abi: AERODROME_ROUTER_ABI,
-        functionName: 'swapExactETHForTokens',
-        args: [minOut, SWAP_ROUTES, address as `0x${string}`, deadline]
+        abi: SLIPSTREAM_ROUTER_ABI,
+        functionName: 'exactInput',
+        args: [{
+          path: SWAP_PATH,
+          recipient: address as `0x${string}`,
+          deadline: deadline,
+          amountIn: amountInWei,
+          amountOutMinimum: minOut
+        }]
       });
       
       const txHash = await provider.request({
         method: 'eth_sendTransaction',
-        params: [{ from: address, to: AERODROME_ROUTER, value: '0x' + amountInWei.toString(16), data, chainId: '0x2105' }]
+        params: [{ from: address, to: SLIPSTREAM_ROUTER, value: '0x' + amountInWei.toString(16), data, chainId: '0x2105' }]
       });
       
       console.log('Swap tx:', txHash);
@@ -435,7 +460,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                   <button onClick={handleSwap} disabled={isSwapping || !swapAmount || parseFloat(swapAmount) <= 0 || !estimatedMerc} className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                     {isSwapping ? <><Loader2 className="w-4 h-4 animate-spin" /> Swapping...</> : <><Coins className="w-4 h-4" /> Swap for MERC</>}
                   </button>
-                  <p className="text-xs text-gray-500 mt-2 text-center">Powered by Aerodrome • ETH → USDC → MERC • 4% slippage</p>
+                  <p className="text-xs text-gray-500 mt-2 text-center">Powered by Aerodrome Slipstream • ETH → USDC → MERC • 10% slippage</p>
                 </div>
 
                 {/* MERC Info Panel */}
