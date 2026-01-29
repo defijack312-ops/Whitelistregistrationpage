@@ -482,7 +482,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
               </div>
             </div>
             <h1 className="text-4xl sm:text-5xl font-black text-white mb-3 drop-shadow-lg">Welcome Back!</h1>
-            <p className="text-xl text-blue-200 mb-2">You're on the $1980 MIRACLE Whitelist</p>
+            <p className="text-xl text-blue-200 mb-2">You've registered for the $1980 Whitelist</p>
           </div>
 
           <div className={`bg-white/95 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 border-4 ${isConfirmed ? 'border-green-600' : 'border-blue-600'}`}>
@@ -525,7 +525,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                 <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                   <Coins className="w-4 h-4 text-yellow-600" /> Get Ready for the $1980 Sale
                 </label>
-                <p className="text-sm text-gray-600 mb-3">You will need MERC to participate in the $1980 token sale.</p>
+                <p className="text-sm text-gray-600 mb-3">You will need MERC to participate in the $1980 token sale on Base.</p>
                 
                 <div className="bg-white rounded-lg p-3 mb-3 border border-yellow-300 space-y-2">
                   <div className="flex items-center justify-between">
