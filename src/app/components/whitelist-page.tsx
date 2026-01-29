@@ -514,7 +514,7 @@ export function WhitelistPage() {
               </div>
             </div>
             <h2 className="text-4xl sm:text-5xl font-black text-white mb-3 drop-shadow-lg">
-              Miracle of 1980
+              Miracle of $1980
             </h2>
 <p className="text-2xl sm:text-3xl font-bold text-blue-200 mb-2">
 Community Whitelist
