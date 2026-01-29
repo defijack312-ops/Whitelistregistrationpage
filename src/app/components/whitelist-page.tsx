@@ -18,6 +18,7 @@ interface FormData {
 }
 
 interface RegistrationStatus {
+  status?: 'pending' | 'confirmed';
   isRegistered: boolean;
   registrationDate?: string;
   email?: string;
@@ -149,6 +150,7 @@ export function WhitelistPage() {
           setRegistrationStatus({
             isRegistered: true,
             registrationDate: result.registrationDate,
+            status: result.status || 'pending',
             email: result.email,
           });
         } else {
@@ -275,6 +277,7 @@ export function WhitelistPage() {
           isRegistered: true,
           registrationDate: new Date().toISOString(),
           email: data.email,
+          status: 'pending',
         });
       } else {
         console.error('Registration error:', result.error);
@@ -307,6 +310,7 @@ export function WhitelistPage() {
       <WalletDashboard 
         userEmail={registrationStatus.email} 
         registrationDate={registrationStatus.registrationDate}
+        status={registrationStatus.status}
       />
     );
   }

@@ -41,6 +41,7 @@ app.post("/make-server-6849dabd/check-registration", async (c) => {
         isRegistered: true,
         registrationDate: registration.timestamp,
         email: registration.email,
+        status: registration.status || 'pending', // Default to pending if not set
       });
     } else {
       return c.json({
@@ -76,6 +77,7 @@ app.post("/make-server-6849dabd/register", async (c) => {
       xProfile,
       email,
       inviteCode,
+      status: 'pending', // Default status is pending
       timestamp: new Date().toISOString(),
     };
 
