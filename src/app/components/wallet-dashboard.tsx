@@ -474,7 +474,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                         ))}
                       </div>
                     </div>
-                    {slippage >= 5 && <p className="text-xs text-yellow-600 mt-1">⚠️ High slippage - MERC has low liquidity</p>}
+
                   </div>
                   
                   <button onClick={handleSwap} disabled={isSwapping || !swapAmount || parseFloat(swapAmount) <= 0 || !estimatedMerc} className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
