@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle } from 'lucide-react';
+import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle, CreditCard } from 'lucide-react';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 
@@ -13,7 +13,7 @@ interface WalletDashboardProps {
 }
 
 export function WalletDashboard({ userEmail, registrationDate, status = 'pending', xProfile: initialXProfile, xVerified: initialXVerified = false }: WalletDashboardProps) {
-  const { logout, exportWallet, user, linkTwitter } = usePrivy();
+  const { logout, exportWallet, user, linkTwitter, fundWallet } = usePrivy();
   const { wallets } = useWallets();
   const [copied, setCopied] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -194,6 +194,24 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                 >
                   View on BaseScan <ExternalLink className="w-3 h-3" />
                 </a>
+              </div>
+
+              {/* Fund Wallet */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-blue-200">
+                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-blue-600" />
+                  Fund Your Wallet
+                </label>
+                <p className="text-sm text-gray-600 mb-3">
+                  Add ETH to your wallet using a credit card, Apple Pay, or Google Pay.
+                </p>
+                <button
+                  onClick={() => fundWallet(address)}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Buy ETH with Card
+                </button>
               </div>
 
               {/* Email */}
