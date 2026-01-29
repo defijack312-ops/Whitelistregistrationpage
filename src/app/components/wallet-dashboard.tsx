@@ -3,6 +3,7 @@ import { usePrivy, useWallets, useFundWallet } from '@privy-io/react-auth';
 import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle, CreditCard, Coins, ArrowDownUp, Loader2 } from 'lucide-react';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
+import mercLogo from '@/assets/merc-logo.svg';
 
 // Token addresses on Base Mainnet
 const MERC_CONTRACT_ADDRESS = '0x8923947EAfaf4aD68F1f0C9eb5463eC876D79058';
@@ -364,6 +365,35 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                     {isSwapping ? <><Loader2 className="w-4 h-4 animate-spin" /> Swapping...</> : <><Coins className="w-4 h-4" /> Swap for MERC</>}
                   </button>
                   <p className="text-xs text-gray-500 mt-2 text-center">Powered by Aerodrome • ETH → USDC → MERC • 4% slippage</p>
+                </div>
+
+                {/* MERC Info Panel */}
+                <div className="mt-4 bg-gray-800 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <img src={mercLogo} alt="Liquid Mercury" className="h-8" />
+                    <a
+                      href="https://liquidmercury.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-2 px-4 rounded-lg text-sm transition-colors flex items-center gap-1"
+                    >
+                      Visit Website <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-gray-700">
+                    <p className="text-xs text-gray-400 mb-1">MERC Contract Address (Base)</p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-xs text-cyan-300 font-mono break-all">{MERC_CONTRACT_ADDRESS}</code>
+                      <a
+                        href={`https://basescan.org/token/${MERC_CONTRACT_ADDRESS}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-cyan-400 hover:text-cyan-300 flex-shrink-0"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
 
