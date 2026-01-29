@@ -5,6 +5,7 @@ import { Twitter, Mail, Wallet, CheckCircle2, Loader2 } from 'lucide-react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { PasscodeGate } from '@/app/components/passcode-gate';
 import { PrivyDiagnostic } from '@/app/components/privy-diagnostic';
+import { WalletDashboard } from '@/app/components/wallet-dashboard';
 import { WHITELIST_CONFIG, validatePasscode, markCodeAsUsed } from '@/app/components/whitelist-config';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
@@ -16,12 +17,22 @@ interface FormData {
   inviteCode?: string;
 }
 
+interface RegistrationStatus {
+  isRegistered: boolean;
+  registrationDate?: string;
+  email?: string;
+}
+
 const STORAGE_KEY = 'miracle_whitelist_access';
 
 export function WhitelistPage() {
   // Privy hooks
   const { login, logout, authenticated, ready, user, createWallet } = usePrivy();
   const { wallets } = useWallets();
+
+  // Registration status
+  const [registrationStatus, setRegistrationStatus] = useState<RegistrationStatus | null>(null);
+  const [checkingRegistration, setCheckingRegistration] = useState(false);
 
   // Show diagnostic if Privy doesn't load within 15 seconds (extended timeout for production)
   useEffect(() => {
@@ -113,6 +124,48 @@ export function WhitelistPage() {
     setIsInitialized(true);
   }, []);
 
+  // Check if user is already registered when they connect
+  useEffect(() => {
+    const checkRegistration = async () => {
+      if (!isConnected || !address) return;
+      
+      setCheckingRegistration(true);
+      try {
+        const response = await fetch(
+          `https://${projectId}.supabase.co/functions/v1/make-server-6849dabd/check-registration`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${publicAnonKey}`,
+            },
+            body: JSON.stringify({ walletAddress: address }),
+          }
+        );
+
+        const result = await response.json();
+        
+        if (result.isRegistered) {
+          setRegistrationStatus({
+            isRegistered: true,
+            registrationDate: result.registrationDate,
+            email: result.email,
+          });
+        } else {
+          setRegistrationStatus({ isRegistered: false });
+        }
+      } catch (error) {
+        console.error('Error checking registration:', error);
+        // If check fails, assume not registered and let them try to register
+        setRegistrationStatus({ isRegistered: false });
+      } finally {
+        setCheckingRegistration(false);
+      }
+    };
+
+    checkRegistration();
+  }, [isConnected, address]);
+
   // Auto-fill wallet address when connected
   useEffect(() => {
     if (hasAccess && isConnected && address) {
@@ -180,9 +233,10 @@ export function WhitelistPage() {
         hasCreateWallet: !!createWallet,
         creationAttempted: walletCreationAttemptedRef.current,
         skipWalletCreation,
+        registrationStatus,
       });
     }
-  }, [authenticated, ready, wallets.length, address, user, createWallet, skipWalletCreation]);
+  }, [authenticated, ready, wallets.length, address, user, createWallet, skipWalletCreation, registrationStatus]);
 
   const handlePasscodeSuccess = (code: string) => {
     setHasAccess(true);
@@ -216,6 +270,12 @@ export function WhitelistPage() {
 
       if (result.success) {
         setSubmitted(true);
+        // Update registration status
+        setRegistrationStatus({
+          isRegistered: true,
+          registrationDate: new Date().toISOString(),
+          email: data.email,
+        });
       } else {
         console.error('Registration error:', result.error);
         alert(result.error || 'Failed to register. Please try again.');
@@ -241,6 +301,31 @@ export function WhitelistPage() {
     return <PasscodeGate onSuccess={handlePasscodeSuccess} validateCode={validatePasscode} />;
   }
 
+  // Show wallet dashboard if user is already registered
+  if (isConnected && registrationStatus?.isRegistered) {
+    return (
+      <WalletDashboard 
+        userEmail={registrationStatus.email} 
+        registrationDate={registrationStatus.registrationDate}
+      />
+    );
+  }
+
+  // Show loading while checking registration
+  if (isConnected && checkingRegistration) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-red-900 p-4">
+        <div className="max-w-md w-full bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 text-center">
+          <Loader2 className="w-16 h-16 mx-auto mb-6 text-blue-600 animate-spin" />
+          <h2 className="text-2xl mb-4 text-gray-900">Checking Registration...</h2>
+          <p className="text-gray-600">
+            Please wait while we verify your whitelist status.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-red-900 p-4">
@@ -250,9 +335,15 @@ export function WhitelistPage() {
           <p className="text-gray-600 mb-6">
             Thanks for registering for the $1980 MIRACLE. We'll contact you via email with further details.
           </p>
-          <p className="text-sm text-gray-500 italic">
+          <p className="text-sm text-gray-500 italic mb-6">
             "Do you believe in miracles? YES!" - Al Michaels
           </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+          >
+            Go to Wallet Dashboard
+          </button>
         </div>
       </div>
     );
