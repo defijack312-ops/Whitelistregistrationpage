@@ -5,7 +5,7 @@ import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 
 // MERC Token on Base Mainnet
-const MERC_CONTRACT_ADDRESS = '0x4CE3687fEd17e19324F23e305593Ab13bBd55c4D';
+const MERC_CONTRACT_ADDRESS = '0x8923947EAfaf4aD68F1f0C9eb5463eC876D79058';
 const MERC_DECIMALS = 18;
 
 // Minimal ERC20 ABI for balanceOf
@@ -167,7 +167,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
 
   const openAerodrome = () => {
     // Aerodrome swap URL for ETH -> MERC on Base
-    const aerodromeUrl = `https://aerodrome.finance/swap?from=eth&to=${MERC_CONTRACT_ADDRESS}`;
+    const aerodromeUrl = 'https://aerodrome.finance/swap?to=0x8923947eafaf4ad68f1f0c9eb5463ec876d79058&from=eth&chain0=8453&chain1=8453';
     window.open(aerodromeUrl, '_blank');
   };
 
