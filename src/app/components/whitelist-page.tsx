@@ -22,6 +22,8 @@ interface RegistrationStatus {
   isRegistered: boolean;
   registrationDate?: string;
   email?: string;
+  xProfile?: string;
+  xVerified?: boolean;
 }
 
 const STORAGE_KEY = 'miracle_whitelist_access';
@@ -152,6 +154,8 @@ export function WhitelistPage() {
             registrationDate: result.registrationDate,
             status: result.status || 'pending',
             email: result.email,
+            xProfile: result.xProfile,
+            xVerified: result.xVerified || false,
           });
         } else {
           setRegistrationStatus({ isRegistered: false });
@@ -311,6 +315,8 @@ export function WhitelistPage() {
         userEmail={registrationStatus.email} 
         registrationDate={registrationStatus.registrationDate}
         status={registrationStatus.status}
+        xProfile={registrationStatus.xProfile}
+        xVerified={registrationStatus.xVerified}
       />
     );
   }

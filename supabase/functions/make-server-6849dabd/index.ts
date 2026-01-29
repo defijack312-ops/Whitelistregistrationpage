@@ -41,7 +41,9 @@ app.post("/make-server-6849dabd/check-registration", async (c) => {
         isRegistered: true,
         registrationDate: registration.timestamp,
         email: registration.email,
-        status: registration.status || 'pending', // Default to pending if not set
+        xProfile: registration.xProfile,
+        xVerified: registration.xVerified || false,
+        status: registration.status || 'pending',
       });
     } else {
       return c.json({
@@ -77,7 +79,8 @@ app.post("/make-server-6849dabd/register", async (c) => {
       xProfile,
       email,
       inviteCode,
-      status: 'pending', // Default status is pending
+      xVerified: false,
+      status: 'pending',
       timestamp: new Date().toISOString(),
     };
 
@@ -94,6 +97,52 @@ app.post("/make-server-6849dabd/register", async (c) => {
   } catch (error) {
     console.log(`Error in register endpoint: ${error}`);
     return c.json({ error: "Server error during registration" }, 500);
+  }
+});
+
+// Verify X account - update registration with verified X handle
+app.post("/make-server-6849dabd/verify-x", async (c) => {
+  try {
+    const { walletAddress, verifiedXHandle } = await c.req.json();
+
+    if (!walletAddress || !verifiedXHandle) {
+      return c.json({ error: "Missing wallet address or verified X handle" }, 400);
+    }
+
+    // Get existing registration
+    const registration = await kv.get(`registration:${walletAddress.toLowerCase()}`);
+    
+    if (!registration) {
+      return c.json({ error: "Registration not found" }, 404);
+    }
+
+    // Store old X profile index key for cleanup
+    const oldXKey = `registration_by_x:${registration.xProfile.toLowerCase().replace('@', '')}`;
+
+    // Update registration with verified X handle
+    const updatedRegistration = {
+      ...registration,
+      xProfile: verifiedXHandle,
+      xVerified: true,
+      xVerifiedAt: new Date().toISOString(),
+    };
+
+    // Save updated registration
+    await kv.set(`registration:${walletAddress.toLowerCase()}`, updatedRegistration);
+
+    // Update X username index (delete old, add new)
+    await kv.delete(oldXKey);
+    await kv.set(`registration_by_x:${verifiedXHandle.toLowerCase().replace('@', '')}`, updatedRegistration);
+
+    return c.json({
+      success: true,
+      message: "X account verified successfully",
+      xProfile: verifiedXHandle,
+      xVerified: true,
+    });
+  } catch (error) {
+    console.log(`Error in verify-x endpoint: ${error}`);
+    return c.json({ error: "Server error verifying X account" }, 500);
   }
 });
 

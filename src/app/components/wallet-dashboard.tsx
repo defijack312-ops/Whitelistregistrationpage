@@ -1,23 +1,67 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter } from 'lucide-react';
+import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle } from 'lucide-react';
+import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 
 interface WalletDashboardProps {
   userEmail?: string;
   registrationDate?: string;
   status?: 'pending' | 'confirmed';
+  xProfile?: string;
+  xVerified?: boolean;
 }
 
-export function WalletDashboard({ userEmail, registrationDate, status = 'pending' }: WalletDashboardProps) {
-  const { logout, exportWallet, user } = usePrivy();
+export function WalletDashboard({ userEmail, registrationDate, status = 'pending', xProfile: initialXProfile, xVerified: initialXVerified = false }: WalletDashboardProps) {
+  const { logout, exportWallet, user, linkTwitter } = usePrivy();
   const { wallets } = useWallets();
   const [copied, setCopied] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isVerifyingX, setIsVerifyingX] = useState(false);
+  const [xProfile, setXProfile] = useState(initialXProfile);
+  const [xVerified, setXVerified] = useState(initialXVerified);
 
   const address = wallets[0]?.address;
   const displayEmail = userEmail || user?.email?.address;
   const isConfirmed = status === 'confirmed';
+
+  // Check if user has Twitter linked in Privy
+  const privyTwitter = user?.twitter;
+  const privyTwitterHandle = privyTwitter?.username ? `@${privyTwitter.username}` : null;
+
+  // Auto-verify if user has Twitter linked in Privy but registration is not verified
+  useEffect(() => {
+    const autoVerifyX = async () => {
+      if (privyTwitterHandle && !xVerified && address) {
+        try {
+          const response = await fetch(
+            `https://${projectId}.supabase.co/functions/v1/make-server-6849dabd/verify-x`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${publicAnonKey}`,
+              },
+              body: JSON.stringify({
+                walletAddress: address,
+                verifiedXHandle: privyTwitterHandle,
+              }),
+            }
+          );
+
+          const result = await response.json();
+          if (result.success) {
+            setXProfile(privyTwitterHandle);
+            setXVerified(true);
+          }
+        } catch (error) {
+          console.error('Error auto-verifying X:', error);
+        }
+      }
+    };
+
+    autoVerifyX();
+  }, [privyTwitterHandle, xVerified, address]);
 
   const copyAddress = async () => {
     if (address) {
@@ -36,6 +80,24 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
       alert('Unable to export wallet. This feature is only available for embedded wallets created through Privy.');
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleVerifyX = async () => {
+    try {
+      setIsVerifyingX(true);
+      
+      // Link Twitter via Privy
+      await linkTwitter();
+      
+      // Note: The actual verification will happen via the useEffect above
+      // when user.twitter becomes available after linking
+      
+    } catch (error) {
+      console.error('Error linking Twitter:', error);
+      alert('Unable to verify X account. Please try again.');
+    } finally {
+      setIsVerifyingX(false);
     }
   };
 
@@ -143,6 +205,45 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                   <p className="text-gray-900">{displayEmail}</p>
                 </div>
               )}
+
+              {/* X Profile with Verification Status */}
+              <div className={`rounded-xl p-4 border-2 ${xVerified ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-300'}`}>
+                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <Twitter className="w-4 h-4 text-blue-600" />
+                  X (Twitter) Profile
+                </label>
+                <div className="flex items-center gap-2">
+                  <p className="text-gray-900 font-medium">{xProfile}</p>
+                  {xVerified ? (
+                    <span className="inline-flex items-center gap-1 text-green-700 text-sm font-medium bg-green-100 px-2 py-1 rounded-full">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Verified
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-yellow-700 text-sm font-medium bg-yellow-100 px-2 py-1 rounded-full">
+                      <AlertCircle className="w-4 h-4" />
+                      Unverified
+                    </span>
+                  )}
+                </div>
+                
+                {/* Verify X Button - Only show if not verified */}
+                {!xVerified && (
+                  <div className="mt-3">
+                    <button
+                      onClick={handleVerifyX}
+                      disabled={isVerifyingX}
+                      className="w-full bg-black hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Twitter className="w-4 h-4" />
+                      {isVerifyingX ? 'Verifying...' : 'Verify X Account'}
+                    </button>
+                    <p className="text-xs text-yellow-700 mt-2 text-center">
+                      Verify your X account to increase your chances of allocation
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Registration Status - Dynamic based on status */}
               {isConfirmed ? (
