@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield } from 'lucide-react';
+import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock } from 'lucide-react';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 
 interface WalletDashboardProps {
@@ -76,8 +76,8 @@ export function WalletDashboard({ userEmail, registrationDate }: WalletDashboard
           <div className="text-center mb-8">
             <div className="inline-block mb-6">
               <div className="relative">
-                <div className="absolute inset-0 bg-green-600 blur-xl opacity-60 rounded-full" />
-                <CheckCircle2 className="relative w-20 h-20 text-white drop-shadow-2xl" />
+                <div className="absolute inset-0 bg-blue-600 blur-xl opacity-60 rounded-full" />
+                <Clock className="relative w-20 h-20 text-white drop-shadow-2xl" />
               </div>
             </div>
             <h1 className="text-4xl sm:text-5xl font-black text-white mb-3 drop-shadow-lg">
@@ -89,7 +89,7 @@ export function WalletDashboard({ userEmail, registrationDate }: WalletDashboard
           </div>
 
           {/* Dashboard Card */}
-          <div className="bg-white/95 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 border-4 border-green-600">
+          <div className="bg-white/95 backdrop-blur rounded-3xl shadow-2xl p-8 sm:p-10 border-4 border-blue-600">
             <div className="flex items-center justify-center gap-3 mb-8">
               <div className="h-1 w-16 bg-red-600 rounded" />
               <h3 className="text-2xl font-black text-gray-900 uppercase tracking-wide">
@@ -139,13 +139,13 @@ export function WalletDashboard({ userEmail, registrationDate }: WalletDashboard
               )}
 
               {/* Registration Status */}
-              <div className="bg-green-50 rounded-xl p-4 border-2 border-green-200">
-                <div className="flex items-center gap-2 text-green-800">
-                  <CheckCircle2 className="w-5 h-5" />
-                  <span className="font-bold">Whitelist Confirmed</span>
+              <div className="bg-gray-100 rounded-xl p-4 border-2 border-gray-300">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Clock className="w-5 h-5" />
+                  <span className="font-bold">Whitelist Pending</span>
                 </div>
                 {registrationDate && (
-                  <p className="text-sm text-green-700 mt-1">
+                  <p className="text-sm text-gray-600 mt-1">
                     Registered on {new Date(registrationDate).toLocaleDateString()}
                   </p>
                 )}
