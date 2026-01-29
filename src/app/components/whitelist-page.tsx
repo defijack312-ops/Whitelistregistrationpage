@@ -343,8 +343,18 @@ export function WhitelistPage() {
             "Do you believe in miracles? YES!" - Al Michaels
           </p>
           <button
+            onClick={() => {
+              const tweetText = "I just registered for the $1980 MIRACLE whitelist! 🏒🇺🇸 #MiracleOnIce";
+              window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "_blank");
+            }}
+            className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 mb-3"
+          >
+            <Twitter className="w-5 h-5" />
+            Share on X
+          </button>
+          <button
             onClick={() => window.location.reload()}
-            className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-colors"
           >
             Go to Wallet Dashboard
           </button>
