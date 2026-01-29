@@ -4,6 +4,7 @@ import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, T
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 import mercLogo from '@/assets/merc-logo.svg';
+import { encodeFunctionData, decodeFunctionResult } from 'viem';
 
 // Token addresses on Base Mainnet
 const MERC_CONTRACT_ADDRESS = '0x8923947EAfaf4aD68F1f0C9eb5463eC876D79058';
@@ -15,6 +16,50 @@ const MERC_DECIMALS = 18;
 const AERODROME_ROUTER = '0xcF77a3Ba9A5CA399B7c97c74d54e5b1Beb874E43';
 const AERODROME_FACTORY = '0x420DD381b31aEf6683db6B902084cB0FFECe40Da';
 
+// Aerodrome Router ABI (only the functions we need)
+const AERODROME_ROUTER_ABI = [
+  {
+    name: 'getAmountsOut',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'amountIn', type: 'uint256' },
+      {
+        name: 'routes',
+        type: 'tuple[]',
+        components: [
+          { name: 'from', type: 'address' },
+          { name: 'to', type: 'address' },
+          { name: 'stable', type: 'bool' },
+          { name: 'factory', type: 'address' }
+        ]
+      }
+    ],
+    outputs: [{ name: 'amounts', type: 'uint256[]' }]
+  },
+  {
+    name: 'swapExactETHForTokens',
+    type: 'function',
+    stateMutability: 'payable',
+    inputs: [
+      { name: 'amountOutMin', type: 'uint256' },
+      {
+        name: 'routes',
+        type: 'tuple[]',
+        components: [
+          { name: 'from', type: 'address' },
+          { name: 'to', type: 'address' },
+          { name: 'stable', type: 'bool' },
+          { name: 'factory', type: 'address' }
+        ]
+      },
+      { name: 'to', type: 'address' },
+      { name: 'deadline', type: 'uint256' }
+    ],
+    outputs: [{ name: 'amounts', type: 'uint256[]' }]
+  }
+] as const;
+
 interface WalletDashboardProps {
   userEmail?: string;
   registrationDate?: string;
@@ -23,10 +68,21 @@ interface WalletDashboardProps {
   xVerified?: boolean;
 }
 
-// Helper functions for ABI encoding
-const encodeAddress = (addr: string) => addr.slice(2).toLowerCase().padStart(64, '0');
-const encodeBool = (val: boolean) => (val ? '1' : '0').padStart(64, '0');
-const encodeUint256 = (val: bigint) => val.toString(16).padStart(64, '0');
+// Define the routes for 2-hop swap: WETH -> USDC -> MERC
+const SWAP_ROUTES = [
+  {
+    from: WETH_ADDRESS as `0x${string}`,
+    to: USDC_ADDRESS as `0x${string}`,
+    stable: false,
+    factory: AERODROME_FACTORY as `0x${string}`
+  },
+  {
+    from: USDC_ADDRESS as `0x${string}`,
+    to: MERC_CONTRACT_ADDRESS as `0x${string}`,
+    stable: false,
+    factory: AERODROME_FACTORY as `0x${string}`
+  }
+] as const;
 
 export function WalletDashboard({ userEmail, registrationDate, status = 'pending', xProfile: initialXProfile, xVerified: initialXVerified = false }: WalletDashboardProps) {
   const { logout, exportWallet, user, linkTwitter } = usePrivy();
@@ -125,16 +181,12 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
       try {
         const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * 1e18));
         
-        // Encode getAmountsOut for 2-hop: WETH -> USDC -> MERC
-        const functionSelector = '0xd7b0e0a5';
-        const data = functionSelector +
-          encodeUint256(amountInWei) +
-          encodeUint256(BigInt(64)) + // array offset
-          encodeUint256(BigInt(2)) +  // array length (2 routes)
-          // Route 1: WETH -> USDC
-          encodeAddress(WETH_ADDRESS) + encodeAddress(USDC_ADDRESS) + encodeBool(false) + encodeAddress(AERODROME_FACTORY) +
-          // Route 2: USDC -> MERC  
-          encodeAddress(USDC_ADDRESS) + encodeAddress(MERC_CONTRACT_ADDRESS) + encodeBool(false) + encodeAddress(AERODROME_FACTORY);
+        // Use viem to properly encode the getAmountsOut call with struct array
+        const data = encodeFunctionData({
+          abi: AERODROME_ROUTER_ABI,
+          functionName: 'getAmountsOut',
+          args: [amountInWei, SWAP_ROUTES]
+        });
         
         const response = await fetch('https://mainnet.base.org', {
           method: 'POST',
@@ -144,10 +196,15 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
         
         const result = await response.json();
         if (result.result && result.result !== '0x' && result.result.length > 2) {
-          // Result: offset + length + amount0 + amount1 + amount2
-          const hex = result.result.slice(2);
-          const mercAmountHex = hex.slice(256, 320); // 3rd amount (MERC)
-          const mercAmount = BigInt('0x' + mercAmountHex);
+          // Decode the result using viem
+          const amounts = decodeFunctionResult({
+            abi: AERODROME_ROUTER_ABI,
+            functionName: 'getAmountsOut',
+            data: result.result
+          }) as bigint[];
+          
+          // amounts = [inputAmount, afterHop1, afterHop2(MERC)]
+          const mercAmount = amounts[amounts.length - 1];
           const mercFormatted = Number(mercAmount) / 1e18;
           
           if (mercFormatted > 0) {
@@ -209,29 +266,23 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   };
 
   const handleSwap = async () => {
-    if (!embeddedWallet || !swapAmount || parseFloat(swapAmount) <= 0 || !estimatedMerc) return;
+    if (!embeddedWallet || !swapAmount || parseFloat(swapAmount) <= 0 || !estimatedMerc || !address) return;
     setIsSwapping(true);
     setSwapError(null);
     
     try {
       const provider = await embeddedWallet.getEthereumProvider();
       const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * 1e18));
-      const deadline = Math.floor(Date.now() / 1000) + 1200;
+      const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
       const estimatedOut = parseFloat(estimatedMerc.replace(/,/g, ''));
       const minOut = BigInt(Math.floor(estimatedOut * 0.96 * 1e18)); // 4% slippage
       
-      // Encode swapExactETHForTokens for 2-hop
-      const functionSelector = '0x304e6ade';
-      const data = functionSelector +
-        encodeUint256(minOut) +
-        encodeUint256(BigInt(128)) + // routes offset
-        encodeAddress(address!) +
-        encodeUint256(BigInt(deadline)) +
-        encodeUint256(BigInt(2)) + // 2 routes
-        // Route 1: WETH -> USDC
-        encodeAddress(WETH_ADDRESS) + encodeAddress(USDC_ADDRESS) + encodeBool(false) + encodeAddress(AERODROME_FACTORY) +
-        // Route 2: USDC -> MERC
-        encodeAddress(USDC_ADDRESS) + encodeAddress(MERC_CONTRACT_ADDRESS) + encodeBool(false) + encodeAddress(AERODROME_FACTORY);
+      // Use viem to properly encode the swapExactETHForTokens call
+      const data = encodeFunctionData({
+        abi: AERODROME_ROUTER_ABI,
+        functionName: 'swapExactETHForTokens',
+        args: [minOut, SWAP_ROUTES, address as `0x${string}`, deadline]
+      });
       
       const txHash = await provider.request({
         method: 'eth_sendTransaction',
