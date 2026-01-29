@@ -514,14 +514,14 @@ export function WhitelistPage() {
               </div>
             </div>
             <h2 className="text-4xl sm:text-5xl font-black text-white mb-3 drop-shadow-lg">
-              $1980 MIRACLE
+              Miracle of 1980
             </h2>
-            <p className="text-2xl sm:text-3xl font-bold text-blue-200 mb-2">
-              Community Whitelist
-            </p>
-            <p className="text-lg text-white/90 max-w-xl mx-auto">
-              Join the exclusive MIRACLE whitelist
-            </p>
+<p className="text-2xl sm:text-3xl font-bold text-blue-200 mb-2">
+Community Whitelist
+</p>
+<p className="text-lg text-white/90 max-w-xl mx-auto">
+Join the community preserving the miracle that happened in 1980
+</p>
           </div>
 
           {/* Form Card */}
