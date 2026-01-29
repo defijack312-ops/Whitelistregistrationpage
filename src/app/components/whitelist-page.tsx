@@ -344,7 +344,7 @@ export function WhitelistPage() {
           </p>
           <button
             onClick={() => {
-              const tweetText = "I just registered for the $1980 MIRACLE whitelist! 🏒🇺🇸 #MiracleOnIce";
+              const tweetText = "I just registered for the $1980 whitelist! 🏒🇺🇸 #DoYouBelieveInMiracles?";
               window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "_blank");
             }}
             className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 mb-3"
