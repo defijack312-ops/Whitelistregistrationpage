@@ -80,6 +80,30 @@ const SLIPSTREAM_ROUTER_ABI = [
   }
 ] as const;
 
+// ERC20 ABI for USDC approval
+const ERC20_ABI = [
+  {
+    name: 'approve',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'bool' }]
+  },
+  {
+    name: 'allowance',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }]
+  }
+] as const;
+
 // Helper to encode swap path for Slipstream (token + tickSpacing + token + tickSpacing + token)
 function encodeSlipstreamPath(tokens: string[], tickSpacings: number[]): `0x${string}` {
   let path = tokens[0].slice(2); // Remove 0x from first token
@@ -99,10 +123,14 @@ interface WalletDashboardProps {
   xVerified?: boolean;
 }
 
-// Build the Slipstream swap path: WETH -> USDC -> MERC
-const SWAP_PATH = encodeSlipstreamPath(
+// Build the Slipstream swap paths
+const SWAP_PATH_ETH = encodeSlipstreamPath(
   [WETH_ADDRESS, USDC_ADDRESS, MERC_CONTRACT_ADDRESS],
   [WETH_USDC_TICK_SPACING, USDC_MERC_TICK_SPACING]
+);
+const SWAP_PATH_USDC = encodeSlipstreamPath(
+  [USDC_ADDRESS, MERC_CONTRACT_ADDRESS],
+  [USDC_MERC_TICK_SPACING]
 );
 
 export function WalletDashboard({ userEmail, registrationDate, status = 'pending', xProfile: initialXProfile, xVerified: initialXVerified = false }: WalletDashboardProps) {
@@ -117,8 +145,10 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   const [mercBalance, setMercBalance] = useState<string | null>(null);
   const [isLoadingMerc, setIsLoadingMerc] = useState(true);
   const [ethBalance, setEthBalance] = useState<string | null>(null);
+  const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
   
   // Swap state
+  const [inputToken, setInputToken] = useState<'ETH' | 'USDC'>('ETH');
   const [swapAmount, setSwapAmount] = useState('');
   const [estimatedMerc, setEstimatedMerc] = useState<string | null>(null);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
@@ -157,6 +187,36 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
     return () => clearInterval(interval);
   }, [address]);
 
+  // Fetch USDC balance
+  useEffect(() => {
+    const fetchUsdcBalance = async () => {
+      if (!address) return;
+      try {
+        const response = await fetch('https://mainnet.base.org', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0', id: 1, method: 'eth_call',
+            params: [{ to: USDC_ADDRESS, data: `0x70a08231000000000000000000000000${address.slice(2)}` }, 'latest']
+          })
+        });
+        const result = await response.json();
+        if (result.result) {
+          const balanceWei = BigInt(result.result);
+          setUsdcBalance((Number(balanceWei) / (10 ** USDC_DECIMALS)).toFixed(2));
+        } else {
+          setUsdcBalance('0');
+        }
+      } catch (error) {
+        console.error('Error fetching USDC balance:', error);
+        setUsdcBalance('--');
+      }
+    };
+    fetchUsdcBalance();
+    const interval = setInterval(fetchUsdcBalance, 30000);
+    return () => clearInterval(interval);
+  }, [address]);
+
   // Fetch MERC balance
   useEffect(() => {
     const fetchMercBalance = async () => {
@@ -190,7 +250,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
     return () => clearInterval(interval);
   }, [address]);
 
-  // Get 2-hop swap quote via Slipstream QuoterV2 (ETH -> USDC -> MERC)
+  // Get swap quote via Slipstream QuoterV2
   useEffect(() => {
     const getQuote = async () => {
       if (!swapAmount || parseFloat(swapAmount) <= 0) {
@@ -201,16 +261,18 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
       setSwapError(null);
       
       try {
-        const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * 1e18));
+        const decimals = inputToken === 'ETH' ? 18 : USDC_DECIMALS;
+        const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * (10 ** decimals)));
+        const swapPath = inputToken === 'ETH' ? SWAP_PATH_ETH : SWAP_PATH_USDC;
         
         // Use Slipstream QuoterV2 quoteExactInput
         const data = encodeFunctionData({
           abi: SLIPSTREAM_QUOTER_ABI,
           functionName: 'quoteExactInput',
-          args: [SWAP_PATH, amountInWei]
+          args: [swapPath, amountInWei]
         });
         
-        console.log('Slipstream quote path:', SWAP_PATH);
+        console.log('Slipstream quote path:', swapPath, 'inputToken:', inputToken);
         console.log('Amount in wei:', amountInWei.toString());
         
         const response = await fetch('https://mainnet.base.org', {
@@ -264,7 +326,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
     };
     const debounce = setTimeout(getQuote, 500);
     return () => clearTimeout(debounce);
-  }, [swapAmount]);
+  }, [swapAmount, inputToken]);
 
   // Auto-verify X
   useEffect(() => {
@@ -312,17 +374,55 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
     
     try {
       const provider = await embeddedWallet.getEthereumProvider();
-      const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * 1e18));
+      const decimals = inputToken === 'ETH' ? 18 : USDC_DECIMALS;
+      const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * (10 ** decimals)));
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
       const estimatedOut = parseFloat(estimatedMerc.replace(/,/g, ''));
-      const minOut = BigInt(Math.floor(estimatedOut * (1 - slippage / 100) * (10 ** MERC_DECIMALS))); // User-selected slippage
+      const minOut = BigInt(Math.floor(estimatedOut * (1 - slippage / 100) * (10 ** MERC_DECIMALS)));
+      const swapPath = inputToken === 'ETH' ? SWAP_PATH_ETH : SWAP_PATH_USDC;
+      
+      // For USDC swaps, we need to approve first
+      if (inputToken === 'USDC') {
+        // Check current allowance
+        const allowanceData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: 'allowance',
+          args: [address as `0x${string}`, SLIPSTREAM_ROUTER as `0x${string}`]
+        });
+        
+        const allowanceResponse = await fetch('https://mainnet.base.org', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: USDC_ADDRESS, data: allowanceData }, 'latest'] })
+        });
+        const allowanceResult = await allowanceResponse.json();
+        const currentAllowance = BigInt(allowanceResult.result || '0');
+        
+        // If allowance is insufficient, request approval
+        if (currentAllowance < amountInWei) {
+          const approveData = encodeFunctionData({
+            abi: ERC20_ABI,
+            functionName: 'approve',
+            args: [SLIPSTREAM_ROUTER as `0x${string}`, amountInWei]
+          });
+          
+          const approveTxHash = await provider.request({
+            method: 'eth_sendTransaction',
+            params: [{ from: address, to: USDC_ADDRESS, data: approveData, chainId: '0x2105' }]
+          });
+          console.log('Approval tx:', approveTxHash);
+          
+          // Wait a bit for approval to be mined
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+      }
       
       // Use Slipstream Router exactInput
       const data = encodeFunctionData({
         abi: SLIPSTREAM_ROUTER_ABI,
         functionName: 'exactInput',
         args: [{
-          path: SWAP_PATH,
+          path: swapPath,
           recipient: address as `0x${string}`,
           deadline: deadline,
           amountIn: amountInWei,
@@ -330,9 +430,20 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
         }]
       });
       
+      // For ETH swaps, send value. For USDC, no value needed.
+      const txParams: any = {
+        from: address,
+        to: SLIPSTREAM_ROUTER,
+        data,
+        chainId: '0x2105'
+      };
+      if (inputToken === 'ETH') {
+        txParams.value = '0x' + amountInWei.toString(16);
+      }
+      
       const txHash = await provider.request({
         method: 'eth_sendTransaction',
-        params: [{ from: address, to: SLIPSTREAM_ROUTER, value: '0x' + amountInWei.toString(16), data, chainId: '0x2105' }]
+        params: [txParams]
       });
       
       console.log('Swap tx:', txHash);
@@ -422,25 +533,51 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                     <span className="font-bold text-gray-900">{ethBalance || '--'} ETH</span>
                   </div>
                   <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Your USDC Balance:</span>
+                    <span className="font-bold text-gray-900">{usdcBalance || '--'} USDC</span>
+                  </div>
+                  <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Your MERC Balance:</span>
                     <span className="font-bold text-gray-900">{isLoadingMerc ? 'Loading...' : `${mercBalance} MERC`}</span>
                   </div>
                 </div>
 
                 <div className="bg-white rounded-lg p-4 border border-yellow-300">
-                  <div className="flex items-center gap-2 mb-3">
-                    <ArrowDownUp className="w-4 h-4 text-yellow-600" />
-                    <span className="font-bold text-gray-800">Swap ETH → MERC</span>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <ArrowDownUp className="w-4 h-4 text-yellow-600" />
+                      <span className="font-bold text-gray-800">Swap for MERC</span>
+                    </div>
+                    {/* Token selector */}
+                    <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                      <button
+                        onClick={() => { setInputToken('ETH'); setSwapAmount(''); setEstimatedMerc(null); }}
+                        className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${inputToken === 'ETH' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        ETH
+                      </button>
+                      <button
+                        onClick={() => { setInputToken('USDC'); setSwapAmount(''); setEstimatedMerc(null); }}
+                        className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${inputToken === 'USDC' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        USDC
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="space-y-3">
                     <div>
                       <label className="text-xs text-gray-500 mb-1 block">You pay</label>
                       <div className="flex items-center gap-2">
-                        <input type="number" value={swapAmount} onChange={(e) => setSwapAmount(e.target.value)} placeholder="0.0" step="0.001" min="0" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-lg font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-                        <span className="font-bold text-gray-700 bg-gray-100 px-3 py-2 rounded-lg">ETH</span>
+                        <input type="number" value={swapAmount} onChange={(e) => setSwapAmount(e.target.value)} placeholder="0.0" step={inputToken === 'ETH' ? '0.001' : '1'} min="0" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-lg font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                        <span className="font-bold text-gray-700 bg-gray-100 px-3 py-2 rounded-lg">{inputToken}</span>
                       </div>
-                      {ethBalance && <button onClick={() => setSwapAmount((parseFloat(ethBalance) * 0.95).toFixed(6))} className="text-xs text-yellow-600 hover:text-yellow-700 mt-1">Max: {ethBalance} ETH</button>}
+                      {inputToken === 'ETH' && ethBalance && (
+                        <button onClick={() => setSwapAmount((parseFloat(ethBalance) * 0.95).toFixed(6))} className="text-xs text-yellow-600 hover:text-yellow-700 mt-1">Max: {ethBalance} ETH</button>
+                      )}
+                      {inputToken === 'USDC' && usdcBalance && (
+                        <button onClick={() => setSwapAmount(usdcBalance)} className="text-xs text-yellow-600 hover:text-yellow-700 mt-1">Max: {usdcBalance} USDC</button>
+                      )}
                     </div>
                     
                     <div className="flex justify-center"><div className="bg-yellow-100 rounded-full p-1"><ArrowDownUp className="w-4 h-4 text-yellow-600" /></div></div>
@@ -480,7 +617,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                   <button onClick={handleSwap} disabled={isSwapping || !swapAmount || parseFloat(swapAmount) <= 0 || !estimatedMerc} className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                     {isSwapping ? <><Loader2 className="w-4 h-4 animate-spin" /> Swapping...</> : <><Coins className="w-4 h-4" /> Swap for MERC</>}
                   </button>
-                  <p className="text-xs text-gray-500 mt-2 text-center">Powered by Aerodrome Slipstream • ETH → USDC → MERC • {slippage}% slippage</p>
+                  <p className="text-xs text-gray-500 mt-2 text-center">Powered by Aerodrome Slipstream • {inputToken === 'ETH' ? 'ETH → USDC → MERC' : 'USDC → MERC'} • {slippage}% slippage</p>
                 </div>
 
                 {/* MERC Info Panel */}
