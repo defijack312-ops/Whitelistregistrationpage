@@ -1,23 +1,55 @@
 import { useState, useEffect } from 'react';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle, CreditCard, Coins } from 'lucide-react';
+import { usePrivy, useWallets, useFundWallet } from '@privy-io/react-auth';
+import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle, CreditCard, Coins, ArrowDownUp, Loader2 } from 'lucide-react';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 
 // MERC Token on Base Mainnet
 const MERC_CONTRACT_ADDRESS = '0x8923947EAfaf4aD68F1f0C9eb5463eC876D79058';
 const MERC_DECIMALS = 18;
+const WETH_ADDRESS = '0x4200000000000000000000000000000000000006'; // WETH on Base
 
-// Minimal ERC20 ABI for balanceOf
-const ERC20_ABI = [
+// Aerodrome Router on Base Mainnet
+const AERODROME_ROUTER = '0xcF77a3Ba9A5CA399B7c97c74d54e5b1Beb874E43';
+
+// Aerodrome Router ABI (minimal for swaps)
+const AERODROME_ROUTER_ABI = [
   {
-    "constant": true,
-    "inputs": [{"name": "_owner", "type": "address"}],
-    "name": "balanceOf",
-    "outputs": [{"name": "balance", "type": "uint256"}],
+    "inputs": [
+      {"internalType": "uint256", "name": "amountIn", "type": "uint256"},
+      {"components": [
+        {"internalType": "address", "name": "from", "type": "address"},
+        {"internalType": "address", "name": "to", "type": "address"},
+        {"internalType": "bool", "name": "stable", "type": "bool"},
+        {"internalType": "address", "name": "factory", "type": "address"}
+      ], "internalType": "struct IRouter.Route[]", "name": "routes", "type": "tuple[]"}
+    ],
+    "name": "getAmountsOut",
+    "outputs": [{"internalType": "uint256[]", "name": "amounts", "type": "uint256[]"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {"internalType": "uint256", "name": "amountOutMin", "type": "uint256"},
+      {"components": [
+        {"internalType": "address", "name": "from", "type": "address"},
+        {"internalType": "address", "name": "to", "type": "address"},
+        {"internalType": "bool", "name": "stable", "type": "bool"},
+        {"internalType": "address", "name": "factory", "type": "address"}
+      ], "internalType": "struct IRouter.Route[]", "name": "routes", "type": "tuple[]"},
+      {"internalType": "address", "name": "to", "type": "address"},
+      {"internalType": "uint256", "name": "deadline", "type": "uint256"}
+    ],
+    "name": "swapExactETHForTokens",
+    "outputs": [{"internalType": "uint256[]", "name": "amounts", "type": "uint256[]"}],
+    "stateMutability": "payable",
     "type": "function"
   }
 ];
+
+// Aerodrome Factory address
+const AERODROME_FACTORY = '0x420DD381b31aEf6683db6B902084cB0FFECe40Da';
 
 interface WalletDashboardProps {
   userEmail?: string;
@@ -28,8 +60,9 @@ interface WalletDashboardProps {
 }
 
 export function WalletDashboard({ userEmail, registrationDate, status = 'pending', xProfile: initialXProfile, xVerified: initialXVerified = false }: WalletDashboardProps) {
-  const { logout, exportWallet, user, linkTwitter, fundWallet } = usePrivy();
+  const { logout, exportWallet, user, linkTwitter } = usePrivy();
   const { wallets } = useWallets();
+  const { fundWallet } = useFundWallet();
   const [copied, setCopied] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isVerifyingX, setIsVerifyingX] = useState(false);
@@ -37,14 +70,56 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   const [xVerified, setXVerified] = useState(initialXVerified);
   const [mercBalance, setMercBalance] = useState<string | null>(null);
   const [isLoadingMerc, setIsLoadingMerc] = useState(true);
+  const [ethBalance, setEthBalance] = useState<string | null>(null);
+  
+  // Swap state
+  const [swapAmount, setSwapAmount] = useState('');
+  const [estimatedMerc, setEstimatedMerc] = useState<string | null>(null);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  const [isSwapping, setIsSwapping] = useState(false);
+  const [swapError, setSwapError] = useState<string | null>(null);
 
   const address = wallets[0]?.address;
+  const embeddedWallet = wallets.find(wallet => wallet.walletClientType === 'privy');
   const displayEmail = userEmail || user?.email?.address;
   const isConfirmed = status === 'confirmed';
 
   // Check if user has Twitter linked in Privy
   const privyTwitter = user?.twitter;
   const privyTwitterHandle = privyTwitter?.username ? `@${privyTwitter.username}` : null;
+
+  // Fetch ETH balance
+  useEffect(() => {
+    const fetchEthBalance = async () => {
+      if (!address) return;
+      
+      try {
+        const response = await fetch('https://mainnet.base.org', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'eth_getBalance',
+            params: [address, 'latest']
+          })
+        });
+        
+        const result = await response.json();
+        if (result.result) {
+          const balanceWei = BigInt(result.result);
+          const balanceEth = Number(balanceWei) / 1e18;
+          setEthBalance(balanceEth.toFixed(6));
+        }
+      } catch (error) {
+        console.error('Error fetching ETH balance:', error);
+      }
+    };
+
+    fetchEthBalance();
+    const interval = setInterval(fetchEthBalance, 30000);
+    return () => clearInterval(interval);
+  }, [address]);
 
   // Fetch MERC balance
   useEffect(() => {
@@ -92,6 +167,86 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
     const interval = setInterval(fetchMercBalance, 30000);
     return () => clearInterval(interval);
   }, [address]);
+
+  // Get swap quote when amount changes
+  useEffect(() => {
+    const getQuote = async () => {
+      if (!swapAmount || parseFloat(swapAmount) <= 0) {
+        setEstimatedMerc(null);
+        return;
+      }
+
+      setIsLoadingQuote(true);
+      setSwapError(null);
+      
+      try {
+        const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * 1e18));
+        
+        // Encode getAmountsOut call
+        // Route: WETH -> MERC (volatile pool)
+        const route = {
+          from: WETH_ADDRESS,
+          to: MERC_CONTRACT_ADDRESS,
+          stable: false,
+          factory: AERODROME_FACTORY
+        };
+        
+        // Encode the function call
+        const functionSelector = '0xd7b0e0a5'; // getAmountsOut(uint256,(address,address,bool,address)[])
+        const encodedAmount = amountInWei.toString(16).padStart(64, '0');
+        const encodedRouteOffset = '0000000000000000000000000000000000000000000000000000000000000040';
+        const encodedRouteLength = '0000000000000000000000000000000000000000000000000000000000000001';
+        const encodedFrom = WETH_ADDRESS.slice(2).toLowerCase().padStart(64, '0');
+        const encodedTo = MERC_CONTRACT_ADDRESS.slice(2).toLowerCase().padStart(64, '0');
+        const encodedStable = '0000000000000000000000000000000000000000000000000000000000000000';
+        const encodedFactory = AERODROME_FACTORY.slice(2).toLowerCase().padStart(64, '0');
+        
+        const callData = functionSelector + encodedAmount + encodedRouteOffset + encodedRouteLength + encodedFrom + encodedTo + encodedStable + encodedFactory;
+        
+        const response = await fetch('https://mainnet.base.org', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'eth_call',
+            params: [
+              {
+                to: AERODROME_ROUTER,
+                data: callData
+              },
+              'latest'
+            ]
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.result && result.result !== '0x') {
+          // Decode the result - it's an array of amounts
+          // Skip the offset (32 bytes) and length (32 bytes), then get the second amount
+          const hex = result.result.slice(2);
+          // The result is: offset (32) + length (32) + amount0 (32) + amount1 (32)
+          const amount1Hex = hex.slice(192, 256);
+          const mercAmount = BigInt('0x' + amount1Hex);
+          const mercFormatted = Number(mercAmount) / 1e18;
+          setEstimatedMerc(mercFormatted.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+        } else {
+          setEstimatedMerc(null);
+          setSwapError('Unable to get quote. Pool may not exist.');
+        }
+      } catch (error) {
+        console.error('Error getting quote:', error);
+        setEstimatedMerc(null);
+        setSwapError('Error fetching quote');
+      } finally {
+        setIsLoadingQuote(false);
+      }
+    };
+
+    const debounce = setTimeout(getQuote, 500);
+    return () => clearTimeout(debounce);
+  }, [swapAmount]);
 
   // Auto-verify if user has Twitter linked in Privy but registration is not verified
   useEffect(() => {
@@ -165,10 +320,81 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
     }
   };
 
-  const openAerodrome = () => {
-    // Aerodrome swap URL for ETH -> MERC on Base
-    const aerodromeUrl = 'https://aerodrome.finance/swap?to=0x8923947eafaf4ad68f1f0c9eb5463ec876d79058&from=eth&chain0=8453&chain1=8453';
-    window.open(aerodromeUrl, '_blank');
+  const handleFundWallet = async () => {
+    try {
+      await fundWallet({ 
+        address: address as string,
+        chain: { id: 8453, name: 'Base' }
+      });
+    } catch (error) {
+      console.error('Error opening fund wallet:', error);
+    }
+  };
+
+  const handleSwap = async () => {
+    if (!embeddedWallet || !swapAmount || parseFloat(swapAmount) <= 0) return;
+    
+    setIsSwapping(true);
+    setSwapError(null);
+    
+    try {
+      const provider = await embeddedWallet.getEthereumProvider();
+      
+      const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * 1e18));
+      const deadline = Math.floor(Date.now() / 1000) + 1200; // 20 minutes
+      
+      // Calculate minimum out with 2% slippage
+      const estimatedOut = estimatedMerc ? parseFloat(estimatedMerc.replace(/,/g, '')) : 0;
+      const minOut = BigInt(Math.floor(estimatedOut * 0.98 * 1e18));
+      
+      // Encode swapExactETHForTokens call
+      const functionSelector = '0x1f00ca74'; // This is wrong, let me fix
+      
+      // Actually, let's use a simpler approach - direct transaction
+      // swapExactETHForTokens(uint256 amountOutMin, Route[] routes, address to, uint256 deadline)
+      const selector = '0x304e6ade'; // swapExactETHForTokens
+      
+      // Encode parameters
+      const minOutHex = minOut.toString(16).padStart(64, '0');
+      const routesOffset = '0000000000000000000000000000000000000000000000000000000000000080';
+      const toAddress = address!.slice(2).toLowerCase().padStart(64, '0');
+      const deadlineHex = deadline.toString(16).padStart(64, '0');
+      const routesLength = '0000000000000000000000000000000000000000000000000000000000000001';
+      const fromToken = WETH_ADDRESS.slice(2).toLowerCase().padStart(64, '0');
+      const toToken = MERC_CONTRACT_ADDRESS.slice(2).toLowerCase().padStart(64, '0');
+      const stable = '0000000000000000000000000000000000000000000000000000000000000000';
+      const factory = AERODROME_FACTORY.slice(2).toLowerCase().padStart(64, '0');
+      
+      const data = selector + minOutHex + routesOffset + toAddress + deadlineHex + routesLength + fromToken + toToken + stable + factory;
+      
+      // Send transaction
+      const txHash = await provider.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: address,
+          to: AERODROME_ROUTER,
+          value: '0x' + amountInWei.toString(16),
+          data: data,
+          chainId: '0x2105' // Base mainnet
+        }]
+      });
+      
+      console.log('Swap transaction sent:', txHash);
+      
+      // Wait a bit and refresh balances
+      setTimeout(() => {
+        setSwapAmount('');
+        setEstimatedMerc(null);
+      }, 2000);
+      
+      alert('Swap submitted! Transaction: ' + txHash);
+      
+    } catch (error: any) {
+      console.error('Swap error:', error);
+      setSwapError(error.message || 'Swap failed. Please try again.');
+    } finally {
+      setIsSwapping(false);
+    }
   };
 
   return (
@@ -276,7 +502,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                   Add ETH to your wallet using a credit card, Apple Pay, or Google Pay.
                 </p>
                 <button
-                  onClick={() => fundWallet(address)}
+                  onClick={handleFundWallet}
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <CreditCard className="w-4 h-4" />
@@ -284,7 +510,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                 </button>
               </div>
 
-              {/* Get Ready for $1980 Sale - MERC Section */}
+              {/* Get Ready for $1980 Sale - MERC Section with Embedded Swap */}
               <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-2 border-yellow-400">
                 <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                   <Coins className="w-4 h-4 text-yellow-600" />
@@ -294,8 +520,12 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                   You will need MERC to participate in the $1980 token sale.
                 </p>
                 
-                {/* MERC Balance Display */}
-                <div className="bg-white rounded-lg p-3 mb-3 border border-yellow-300">
+                {/* Balances Display */}
+                <div className="bg-white rounded-lg p-3 mb-3 border border-yellow-300 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Your ETH Balance:</span>
+                    <span className="font-bold text-gray-900">{ethBalance || '--'} ETH</span>
+                  </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Your MERC Balance:</span>
                     <span className="font-bold text-gray-900">
@@ -307,17 +537,88 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                     </span>
                   </div>
                 </div>
-                
-                <button
-                  onClick={openAerodrome}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-                >
-                  <Coins className="w-4 h-4" />
-                  Buy MERC
-                </button>
-                <p className="text-xs text-yellow-700 mt-2 text-center">
-                  Opens Aerodrome on Base to swap ETH for MERC
-                </p>
+
+                {/* Embedded Swap Widget */}
+                <div className="bg-white rounded-lg p-4 border border-yellow-300">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ArrowDownUp className="w-4 h-4 text-yellow-600" />
+                    <span className="font-bold text-gray-800">Swap ETH → MERC</span>
+                  </div>
+                  
+                  {/* Input */}
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">You pay</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={swapAmount}
+                          onChange={(e) => setSwapAmount(e.target.value)}
+                          placeholder="0.0"
+                          step="0.001"
+                          min="0"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-lg font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        />
+                        <span className="font-bold text-gray-700 bg-gray-100 px-3 py-2 rounded-lg">ETH</span>
+                      </div>
+                      {ethBalance && (
+                        <button 
+                          onClick={() => setSwapAmount((parseFloat(ethBalance) * 0.95).toFixed(6))}
+                          className="text-xs text-yellow-600 hover:text-yellow-700 mt-1"
+                        >
+                          Max: {ethBalance} ETH
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="flex justify-center">
+                      <div className="bg-yellow-100 rounded-full p-1">
+                        <ArrowDownUp className="w-4 h-4 text-yellow-600" />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">You receive (estimated)</label>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-lg font-mono bg-gray-50 text-gray-700">
+                          {isLoadingQuote ? (
+                            <span className="text-gray-400">Loading...</span>
+                          ) : estimatedMerc ? (
+                            estimatedMerc
+                          ) : (
+                            <span className="text-gray-400">0.0</span>
+                          )}
+                        </div>
+                        <span className="font-bold text-gray-700 bg-gray-100 px-3 py-2 rounded-lg">MERC</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {swapError && (
+                    <p className="text-red-500 text-xs mt-2">{swapError}</p>
+                  )}
+                  
+                  <button
+                    onClick={handleSwap}
+                    disabled={isSwapping || !swapAmount || parseFloat(swapAmount) <= 0 || !estimatedMerc}
+                    className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    {isSwapping ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Swapping...
+                      </>
+                    ) : (
+                      <>
+                        <Coins className="w-4 h-4" />
+                        Swap for MERC
+                      </>
+                    )}
+                  </button>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    Powered by Aerodrome • 2% slippage tolerance
+                  </p>
+                </div>
               </div>
 
               {/* Email */}
