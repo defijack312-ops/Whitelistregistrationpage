@@ -1,8 +1,23 @@
 import { useState, useEffect } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle, CreditCard } from 'lucide-react';
+import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle, CreditCard, Coins } from 'lucide-react';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
+
+// MERC Token on Base Mainnet
+const MERC_CONTRACT_ADDRESS = '0x4CE3687fEd17e19324F23e305593Ab13bBd55c4D';
+const MERC_DECIMALS = 18;
+
+// Minimal ERC20 ABI for balanceOf
+const ERC20_ABI = [
+  {
+    "constant": true,
+    "inputs": [{"name": "_owner", "type": "address"}],
+    "name": "balanceOf",
+    "outputs": [{"name": "balance", "type": "uint256"}],
+    "type": "function"
+  }
+];
 
 interface WalletDashboardProps {
   userEmail?: string;
@@ -20,6 +35,8 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   const [isVerifyingX, setIsVerifyingX] = useState(false);
   const [xProfile, setXProfile] = useState(initialXProfile);
   const [xVerified, setXVerified] = useState(initialXVerified);
+  const [mercBalance, setMercBalance] = useState<string | null>(null);
+  const [isLoadingMerc, setIsLoadingMerc] = useState(true);
 
   const address = wallets[0]?.address;
   const displayEmail = userEmail || user?.email?.address;
@@ -28,6 +45,53 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   // Check if user has Twitter linked in Privy
   const privyTwitter = user?.twitter;
   const privyTwitterHandle = privyTwitter?.username ? `@${privyTwitter.username}` : null;
+
+  // Fetch MERC balance
+  useEffect(() => {
+    const fetchMercBalance = async () => {
+      if (!address) return;
+      
+      setIsLoadingMerc(true);
+      try {
+        // Use Base Mainnet RPC
+        const response = await fetch('https://mainnet.base.org', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'eth_call',
+            params: [
+              {
+                to: MERC_CONTRACT_ADDRESS,
+                data: `0x70a08231000000000000000000000000${address.slice(2)}` // balanceOf(address)
+              },
+              'latest'
+            ]
+          })
+        });
+        
+        const result = await response.json();
+        if (result.result) {
+          const balanceWei = BigInt(result.result);
+          const balanceFormatted = Number(balanceWei) / Math.pow(10, MERC_DECIMALS);
+          setMercBalance(balanceFormatted.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+        } else {
+          setMercBalance('0');
+        }
+      } catch (error) {
+        console.error('Error fetching MERC balance:', error);
+        setMercBalance('--');
+      } finally {
+        setIsLoadingMerc(false);
+      }
+    };
+
+    fetchMercBalance();
+    // Refresh balance every 30 seconds
+    const interval = setInterval(fetchMercBalance, 30000);
+    return () => clearInterval(interval);
+  }, [address]);
 
   // Auto-verify if user has Twitter linked in Privy but registration is not verified
   useEffect(() => {
@@ -99,6 +163,12 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
     } finally {
       setIsVerifyingX(false);
     }
+  };
+
+  const openAerodrome = () => {
+    // Aerodrome swap URL for ETH -> MERC on Base
+    const aerodromeUrl = `https://aerodrome.finance/swap?from=eth&to=${MERC_CONTRACT_ADDRESS}`;
+    window.open(aerodromeUrl, '_blank');
   };
 
   return (
@@ -212,6 +282,42 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                   <CreditCard className="w-4 h-4" />
                   Buy ETH with Card
                 </button>
+              </div>
+
+              {/* Get Ready for $1980 Sale - MERC Section */}
+              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-2 border-yellow-400">
+                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-yellow-600" />
+                  Get Ready for the $1980 Sale
+                </label>
+                <p className="text-sm text-gray-600 mb-3">
+                  You will need MERC to participate in the $1980 token sale.
+                </p>
+                
+                {/* MERC Balance Display */}
+                <div className="bg-white rounded-lg p-3 mb-3 border border-yellow-300">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Your MERC Balance:</span>
+                    <span className="font-bold text-gray-900">
+                      {isLoadingMerc ? (
+                        <span className="text-gray-400">Loading...</span>
+                      ) : (
+                        <span>{mercBalance} MERC</span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={openAerodrome}
+                  className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <Coins className="w-4 h-4" />
+                  Buy MERC
+                </button>
+                <p className="text-xs text-yellow-700 mt-2 text-center">
+                  Opens Aerodrome on Base to swap ETH for MERC
+                </p>
               </div>
 
               {/* Email */}
