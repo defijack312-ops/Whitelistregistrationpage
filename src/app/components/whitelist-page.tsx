@@ -520,7 +520,7 @@ export function WhitelistPage() {
 Community Whitelist
 </p>
 <p className="text-lg text-white/90 max-w-xl mx-auto">
-Join the community preserving the miracle that happened in 1980
+Join the community preserving the miracle that happened in $1980
 </p>
           </div>
 
