@@ -124,6 +124,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
   const [swapError, setSwapError] = useState<string | null>(null);
+  const [slippage, setSlippage] = useState(5); // Default 5% slippage
 
   const address = wallets[0]?.address;
   const embeddedWallet = wallets.find(wallet => wallet.walletClientType === 'privy');
@@ -314,7 +315,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
       const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * 1e18));
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
       const estimatedOut = parseFloat(estimatedMerc.replace(/,/g, ''));
-      const minOut = BigInt(Math.floor(estimatedOut * 0.90 * (10 ** MERC_DECIMALS))); // 10% slippage for low liquidity
+      const minOut = BigInt(Math.floor(estimatedOut * (1 - slippage / 100) * (10 ** MERC_DECIMALS))); // User-selected slippage
       
       // Use Slipstream Router exactInput
       const data = encodeFunctionData({
@@ -457,10 +458,29 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                   
                   {swapError && <p className="text-red-500 text-xs mt-2">{swapError}</p>}
                   
+                  {/* Slippage selector */}
+                  <div className="mt-3 pt-3 border-t border-yellow-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-600">Slippage Tolerance</span>
+                      <div className="flex items-center gap-1">
+                        {[1, 3, 5, 10].map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => setSlippage(s)}
+                            className={`px-2 py-1 text-xs rounded ${slippage === s ? 'bg-yellow-500 text-black font-bold' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                          >
+                            {s}%
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {slippage >= 5 && <p className="text-xs text-yellow-600 mt-1">⚠️ High slippage - MERC has low liquidity</p>}
+                  </div>
+                  
                   <button onClick={handleSwap} disabled={isSwapping || !swapAmount || parseFloat(swapAmount) <= 0 || !estimatedMerc} className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                     {isSwapping ? <><Loader2 className="w-4 h-4 animate-spin" /> Swapping...</> : <><Coins className="w-4 h-4" /> Swap for MERC</>}
                   </button>
-                  <p className="text-xs text-gray-500 mt-2 text-center">Powered by Aerodrome Slipstream • ETH → USDC → MERC • 10% slippage</p>
+                  <p className="text-xs text-gray-500 mt-2 text-center">Powered by Aerodrome Slipstream • ETH → USDC → MERC • {slippage}% slippage</p>
                 </div>
 
                 {/* MERC Info Panel */}
