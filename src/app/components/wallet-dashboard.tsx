@@ -215,12 +215,19 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
           
           // amounts = [inputAmount, afterHop1(USDC), afterHop2(MERC)]
           const mercAmount = amountsArray[amountsArray.length - 1] as bigint;
-          const mercFormatted = Number(mercAmount) / 1e18;
+          const mercFormatted = Number(mercAmount) / (10 ** MERC_DECIMALS);
           
-          console.log('MERC amount:', mercAmount, 'formatted:', mercFormatted);
+          console.log('MERC amount raw:', mercAmount, 'MERC decimals:', MERC_DECIMALS, 'formatted:', mercFormatted);
           
-          if (mercFormatted > 0) {
-            setEstimatedMerc(mercFormatted.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+          if (mercAmount > 0n) {
+            // Format based on size - show more decimals for small amounts
+            if (mercFormatted >= 1) {
+              setEstimatedMerc(mercFormatted.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+            } else if (mercFormatted >= 0.0001) {
+              setEstimatedMerc(mercFormatted.toFixed(4));
+            } else {
+              setEstimatedMerc(mercFormatted.toExponential(4));
+            }
           } else {
             setSwapError('No liquidity available');
           }
