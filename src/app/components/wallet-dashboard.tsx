@@ -4,18 +4,18 @@ import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, T
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 import mercLogo from '@/assets/merc-logo.svg';
-import { encodeFunctionData, decodeFunctionResult } from 'viem';
+import { encodeFunctionData, decodeFunctionResult, getAddress } from 'viem';
 
-// Token addresses on Base Mainnet
-const MERC_CONTRACT_ADDRESS = '0x8923947EAfaf4aD68F1f0C9eb5463eC876D79058';
+// Token addresses on Base Mainnet (lowercase to avoid checksum issues)
+const MERC_CONTRACT_ADDRESS = '0x8923947eafaf4ad68f1f0c9eb5463ec876d79058';
 const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
-const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+const USDC_ADDRESS = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
 const MERC_DECIMALS = 18;
 const USDC_DECIMALS = 6;
 
 // Aerodrome Slipstream contracts on Base Mainnet
-const SLIPSTREAM_QUOTER = '0x254cF9E1E6e233aa1AC962CB9B05b2cfeAaE15b0';
-const SLIPSTREAM_ROUTER = '0xBE6D8f0d05cC4Be24d5167a3eF062215bE6D18a5';
+const SLIPSTREAM_QUOTER = '0x254cf9e1e6e233aa1ac962cb9b05b2cfeaae15b0';
+const SLIPSTREAM_ROUTER = '0xbe6d8f0d05cc4be24d5167a3ef062215be6d18a5';
 
 // Pool tick spacings (from DEXscreener)
 const WETH_USDC_TICK_SPACING = 100;  // CL100 pool
@@ -383,11 +383,14 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
       
       // For USDC swaps, we need to approve first
       if (inputToken === 'USDC') {
-        // Check current allowance
+        // Check current allowance - use getAddress for proper checksumming
+        const checksummedAddress = getAddress(address);
+        const checksummedRouter = getAddress(SLIPSTREAM_ROUTER);
+        
         const allowanceData = encodeFunctionData({
           abi: ERC20_ABI,
           functionName: 'allowance',
-          args: [address as `0x${string}`, SLIPSTREAM_ROUTER as `0x${string}`]
+          args: [checksummedAddress, checksummedRouter]
         });
         
         const allowanceResponse = await fetch('https://mainnet.base.org', {
@@ -403,7 +406,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
           const approveData = encodeFunctionData({
             abi: ERC20_ABI,
             functionName: 'approve',
-            args: [SLIPSTREAM_ROUTER as `0x${string}`, amountInWei]
+            args: [checksummedRouter, amountInWei]
           });
           
           const approveTxHash = await provider.request({
@@ -418,12 +421,13 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
       }
       
       // Use Slipstream Router exactInput
+      const checksummedRecipient = getAddress(address);
       const data = encodeFunctionData({
         abi: SLIPSTREAM_ROUTER_ABI,
         functionName: 'exactInput',
         args: [{
           path: swapPath,
-          recipient: address as `0x${string}`,
+          recipient: checksummedRecipient,
           deadline: deadline,
           amountIn: amountInWei,
           amountOutMinimum: minOut
