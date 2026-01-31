@@ -2,6 +2,7 @@ import { PrivyProvider } from '@privy-io/react-auth';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Analytics } from '@vercel/analytics/react';
 import { WhitelistPage } from '@/app/components/whitelist-page';
 
 // Create Wagmi config for Privy
@@ -46,6 +47,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <WagmiProvider config={config}>
           <WhitelistPage />
+          <Analytics />
         </WagmiProvider>
       </QueryClientProvider>
     </PrivyProvider>
