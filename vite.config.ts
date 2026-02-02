@@ -23,6 +23,8 @@ export default defineConfig({
     // Suppress Lit dev mode warning by overriding the dev flag
     'import.meta.env.DEV': false,
     'import.meta.env.PROD': true,
+    // Define global for Node.js library compatibility (required by some web3 libs)
+    global: 'globalThis',
   },
   build: {
     minify: 'esbuild',
