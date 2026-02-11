@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Link } from 'react-router-dom';
+import PDFModal from './pdf-modal';
 import { createPublicClient, http, formatEther, parseEther } from 'viem';
 import { baseSepolia } from 'viem/chains';
 
@@ -99,6 +100,7 @@ const publicClient = createPublicClient({
 
 // Coming Soon Component
 function ComingSoonPage() {
+  const [showPDF, setShowPDF] = useState(false);
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#001f3f] via-[#003d7a] to-[#002868] flex items-center justify-center p-4">
       <div className="text-center">
@@ -122,17 +124,27 @@ function ComingSoonPage() {
           The official 1980 Miracle on Ice token sale is not yet live.
           Join the whitelist to be notified when it launches.
         </p>
-        <Link
-          to="/"
-          className="inline-block px-8 py-4 text-xl tracking-wider border-2 border-[#FFD700] text-white transition-all hover:scale-105 hover:shadow-[0_10px_30px_rgba(220,20,60,0.5)]"
-          style={{
-            fontFamily: 'Bebas Neue, sans-serif',
-            background: 'linear-gradient(135deg, #DC143C 0%, #B01030 100%)'
-          }}
-        >
-          Join Whitelist
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <Link
+            to="/"
+            className="inline-block px-8 py-4 text-xl tracking-wider border-2 border-[#FFD700] text-white transition-all hover:scale-105 hover:shadow-[0_10px_30px_rgba(220,20,60,0.5)]"
+            style={{
+              fontFamily: 'Bebas Neue, sans-serif',
+              background: 'linear-gradient(135deg, #DC143C 0%, #B01030 100%)'
+            }}
+          >
+            Join Whitelist
+          </Link>
+          <button
+            onClick={() => setShowPDF(true)}
+            className="inline-block px-8 py-4 text-xl tracking-wider border-2 border-[#FFD700] text-[#FFD700] bg-transparent transition-all hover:scale-105 hover:bg-[#FFD700]/10 cursor-pointer"
+            style={{ fontFamily: 'Bebas Neue, sans-serif' }}
+          >
+            Read Litepaper
+          </button>
+        </div>
       </div>
+      <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
     </div>
   );
 }
@@ -199,6 +211,7 @@ export function TokenSale() {
   const { wallets } = useWallets();
 
   // State
+  const [showPDF, setShowPDF] = useState(false);
   const [tokenAmount, setTokenAmount] = useState('');
   const [mercAmount, setMercAmount] = useState('0');
   const [isLoading, setIsLoading] = useState(false);
@@ -714,34 +727,34 @@ export function TokenSale() {
       </InfoSection>
 
       {/* Whitepaper Section */}
-      <InfoSection id="whitepaper" title="Whitepaper & Documentation">
+      <InfoSection id="whitepaper" title="Litepaper & Documentation">
         <p className="mb-8 text-xl text-center">
           Access our comprehensive documentation to learn more about the 1980 token structure, mechanics, and safeguards.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
           <div className="bg-[#FFD700]/10 p-8 rounded-[10px] text-center">
-            <h3 className="text-[#FFD700] text-2xl mb-4">📄 Full Whitepaper</h3>
-            <p className="mb-6 opacity-90">Complete tokenomics, vesting schedules, and DAO structure</p>
-            <a
-              href="#"
-              className="inline-block px-8 py-4 text-white border-2 border-[#FFD700] rounded-[5px] transition-all hover:scale-105"
+            <h3 className="text-[#FFD700] text-2xl mb-4">📄 Full Litepaper</h3>
+            <p className="mb-6 opacity-90">Complete tokenomics, sale mechanics, SBT rewards, and DAO structure</p>
+            <button
+              onClick={() => setShowPDF(true)}
+              className="inline-block px-8 py-4 text-white border-2 border-[#FFD700] rounded-[5px] transition-all hover:scale-105 cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B01030 100%)' }}
             >
-              Download PDF
-            </a>
+              View Litepaper
+            </button>
           </div>
 
           <div className="bg-[#FFD700]/10 p-8 rounded-[10px] text-center">
             <h3 className="text-[#FFD700] text-2xl mb-4">📊 System Diagrams</h3>
             <p className="mb-6 opacity-90">Visual flow charts of sale mechanics and tax distribution</p>
-            <a
-              href="#"
-              className="inline-block px-8 py-4 text-white border-2 border-[#FFD700] rounded-[5px] transition-all hover:scale-105"
+            <button
+              onClick={() => setShowPDF(true)}
+              className="inline-block px-8 py-4 text-white border-2 border-[#FFD700] rounded-[5px] transition-all hover:scale-105 cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B01030 100%)' }}
             >
               View Diagrams
-            </a>
+            </button>
           </div>
 
           <div className="bg-[#FFD700]/10 p-8 rounded-[10px] text-center">
@@ -807,9 +820,9 @@ export function TokenSale() {
       {/* Footer */}
       <footer className="text-center px-[5%] py-12 border-t-2 border-[#FFD700]/20 mt-20">
         <div className="flex flex-wrap justify-center gap-8 mb-8">
-          <a href="#whitepaper" className="text-[#FFD700] uppercase tracking-[2px] font-semibold hover:text-white hover:drop-shadow-[0_0_20px_#FFD700] transition-all">
-            Whitepaper
-          </a>
+          <button onClick={() => setShowPDF(true)} className="text-[#FFD700] uppercase tracking-[2px] font-semibold hover:text-white hover:drop-shadow-[0_0_20px_#FFD700] transition-all bg-transparent border-0 cursor-pointer">
+            Litepaper
+          </button>
           <a href="#tokenomics" className="text-[#FFD700] uppercase tracking-[2px] font-semibold hover:text-white hover:drop-shadow-[0_0_20px_#FFD700] transition-all">
             Tokenomics
           </a>
@@ -894,6 +907,9 @@ export function TokenSale() {
           animation: slideIn 0.3s ease;
         }
       `}</style>
+
+      {/* PDF Modal */}
+      <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
     </div>
   );
 }
