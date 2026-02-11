@@ -5,7 +5,7 @@ import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, T
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 import mercLogo from '@/assets/merc-logo.svg';
-import { encodeFunctionData, decodeFunctionResult } from 'viem';
+import { encodeFunctionData, decodeFunctionResult, getAddress } from 'viem';
 
 // Token addresses on Base Mainnet (lowercase to avoid checksum issues)
 const MERC_CONTRACT_ADDRESS = '0x8923947eafaf4ad68f1f0c9eb5463ec876d79058';
