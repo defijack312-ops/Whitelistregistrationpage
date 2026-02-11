@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usePrivy, useWallets, useFundWallet } from '@privy-io/react-auth';
+import PDFModal from './pdf-modal';
 import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle, CreditCard, Coins, ArrowDownUp, Loader2 } from 'lucide-react';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
@@ -139,6 +140,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   const { fundWallet } = useFundWallet();
   const [copied, setCopied] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [showPDF, setShowPDF] = useState(false);
   const [isVerifyingX, setIsVerifyingX] = useState(false);
   const [xProfile, setXProfile] = useState(initialXProfile);
   const [xVerified, setXVerified] = useState(initialXVerified);
@@ -709,6 +711,9 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                   <Twitter className="w-5 h-5" /> Share on X
                 </button>
                 <p className="text-xs text-gray-500 text-center mt-2 italic">This may or may not help guarantee your miracle in securing $1980 😉</p>
+                <button onClick={() => setShowPDF(true)} className="w-full mt-3 bg-white hover:bg-gray-50 text-blue-700 font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-2 border-2 border-blue-600">
+                  📄 Read the Litepaper
+                </button>
               </div>
             </div>
 
@@ -723,6 +728,9 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
           </div>
         </div>
       </div>
+
+      {/* PDF Modal */}
+      <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
     </div>
   );
 }
