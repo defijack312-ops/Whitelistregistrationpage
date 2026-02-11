@@ -670,6 +670,12 @@ Join the community preserving the miracle that happened in $1980
             </p>
           </div>
 
+          {/* Company Footer */}
+          <div className="mt-6 pt-4 border-t border-white/20 text-center">
+            <p className="text-white/50 text-xs">
+              © {new Date().getFullYear()} Miracle of 1980 LLC. All rights reserved.
+            </p>
+          </div>
 
         </div>
       </div>

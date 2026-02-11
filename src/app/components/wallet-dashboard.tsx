@@ -726,6 +726,13 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
             <p className="text-white/90 text-lg sm:text-xl font-bold italic drop-shadow-lg">"Do you believe in miracles? YES!"</p>
             <p className="text-blue-200 text-sm mt-2">- Al Michaels, February 22, 1980</p>
           </div>
+
+          {/* Company Footer */}
+          <div className="mt-6 pt-4 border-t border-white/20 text-center">
+            <p className="text-white/50 text-xs">
+              © {new Date().getFullYear()} Miracle of 1980 LLC. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
 
