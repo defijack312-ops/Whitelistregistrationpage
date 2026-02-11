@@ -29,5 +29,14 @@ export default defineConfig({
   build: {
     minify: 'esbuild',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          web3: ['viem', '@privy-io/react-auth'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 2100,
   },
 })
