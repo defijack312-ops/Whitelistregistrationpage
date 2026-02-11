@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useForm } from 'react-hook-form';
 import { Twitter, Mail, Wallet, CheckCircle2, Loader2 } from 'lucide-react';
+import PDFModal from './pdf-modal';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { PasscodeGate } from '@/app/components/passcode-gate';
 import { PrivyDiagnostic } from '@/app/components/privy-diagnostic';
@@ -36,6 +37,7 @@ export function WhitelistPage() {
   // Registration status
   const [registrationStatus, setRegistrationStatus] = useState<RegistrationStatus | null>(null);
   const [checkingRegistration, setCheckingRegistration] = useState(false);
+  const [showPDF, setShowPDF] = useState(false);
 
   // Show diagnostic if Privy doesn't load within 15 seconds (extended timeout for production)
   useEffect(() => {
@@ -648,6 +650,14 @@ Join the community preserving the miracle that happened in $1980
                 <span className="font-bold">NFT Community Perks:</span> Connect your wallet to verify your NFT holdings for potential whitelist allocations
               </p>
             </div>
+
+            {/* Litepaper Button */}
+            <button
+              onClick={() => setShowPDF(true)}
+              className="w-full mt-4 py-3 rounded-xl border-2 border-blue-600 text-blue-700 font-bold text-sm hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
+            >
+              📄 Read the Litepaper
+            </button>
           </div>
 
           {/* Footer Quote */}
@@ -663,6 +673,9 @@ Join the community preserving the miracle that happened in $1980
 
         </div>
       </div>
+
+      {/* PDF Modal */}
+      <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
     </div>
   );
 }
