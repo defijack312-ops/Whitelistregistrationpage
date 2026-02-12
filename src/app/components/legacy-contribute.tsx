@@ -155,6 +155,11 @@ export function LegacyContribute() {
   const { login, authenticated, ready } = usePrivy();
   const { wallets } = useWallets();
 
+  // Password gate
+  const [passwordInput, setPasswordInput] = useState('');
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const PAGE_PASSWORD = 'Pavelich';
+
   // State
   const [paymentMethod, setPaymentMethod] = useState<'USDC' | 'ETH'>('USDC');
   const [amount, setAmount] = useState('');
@@ -434,6 +439,36 @@ export function LegacyContribute() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-900 via-red-800 to-blue-900 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
+    );
+  }
+
+  // Password gate
+  if (!isUnlocked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-900 via-red-800 to-blue-900 flex items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 max-w-sm w-full mx-4 text-center">
+          <h2 className="text-2xl font-bold text-white mb-2">🏒 Early Access</h2>
+          <p className="text-white/60 text-sm mb-6">Enter the password to access Legacy Contributions</p>
+          <input
+            type="password"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && passwordInput === PAGE_PASSWORD) setIsUnlocked(true); }}
+            placeholder="Enter password"
+            className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4"
+          />
+          <button
+            onClick={() => { if (passwordInput === PAGE_PASSWORD) setIsUnlocked(true); }}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            Enter
+          </button>
+          {passwordInput.length > 0 && passwordInput !== PAGE_PASSWORD && (
+            <p className="text-red-400 text-sm mt-3">Incorrect password</p>
+          )}
+          <Link to="/" className="text-white/50 text-sm mt-4 block hover:text-white/80">← Back to Home</Link>
+        </div>
       </div>
     );
   }
