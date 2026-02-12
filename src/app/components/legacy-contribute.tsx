@@ -17,7 +17,7 @@ import { Wallet, ArrowLeft, Trophy, Star, Shield, Users, Loader2, ChevronDown, C
 
 // ============ CONFIG ============
 const CONFIG = {
-  SBT_ADDRESS: '0x4aaec3c81eC13f735e74A6CcfAB4A0bAb12C4fEd' as `0x${string}`,
+  SBT_ADDRESS: '0x5646220e6602083b135e650B8620edC05F2E47A0' as `0x${string}`,
   // Base Mainnet USDC (6 decimals)
   USDC_ADDRESS: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as `0x${string}`,
   CHAIN_ID: 8453,
