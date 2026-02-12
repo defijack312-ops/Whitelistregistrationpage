@@ -17,7 +17,7 @@ import { Wallet, ArrowLeft, Trophy, Star, Shield, Users, Loader2, ChevronDown, C
 
 // ============ CONFIG ============
 const CONFIG = {
-  SBT_ADDRESS: '0x329B85b6CF63b67bF22D81414e3659dB9EB60bEA' as `0x${string}`,
+  SBT_ADDRESS: '0x314105C2d59f97B829De1D004Db81749Bb26720E' as `0x${string}`,
   // Base Sepolia USDC (6 decimals)
   USDC_ADDRESS: '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as `0x${string}`,
   CHAIN_ID: 84532,
@@ -26,10 +26,10 @@ const CONFIG = {
 
 // Tier thresholds in USDC
 const TIERS = [
-  { id: 1, name: 'Supporter', threshold: 0, color: '#3B82F6', icon: Shield, description: 'Any contribution earns you a Supporter badge', badge: '🔵' },
-  { id: 2, name: 'Team Player', threshold: 1000, color: '#CD7F32', icon: Users, description: 'Contribute $1,000+ to earn Team Player status', badge: '🟤' },
-  { id: 3, name: 'All-Star', threshold: 10000, color: '#C0C0C0', icon: Star, description: 'Contribute $10,000+ to reach All-Star tier', badge: '⚪' },
-  { id: 4, name: 'Legend', threshold: 100000, color: '#FFD700', icon: Trophy, description: 'Contribute $100,000+ to achieve Legend status', badge: '🟡' },
+  { id: 1, name: 'Supporter', threshold: 0, maxLabel: '$500', color: '#3B82F6', icon: Shield, description: 'Contribute up to $500 to earn a Supporter badge', badge: '🔵' },
+  { id: 2, name: 'Team Player', threshold: 1000, maxLabel: '$10K', color: '#CD7F32', icon: Users, description: 'Contribute $1,000+ to earn Team Player status', badge: '🟤' },
+  { id: 3, name: 'All-Star', threshold: 10000, maxLabel: '$25K', color: '#C0C0C0', icon: Star, description: 'Contribute $10,000+ to reach All-Star tier', badge: '⚪' },
+  { id: 4, name: 'Legend', threshold: 25000, maxLabel: '∞', color: '#FFD700', icon: Trophy, description: 'Contribute $25,000+ to achieve Legend status', badge: '🟡' },
 ];
 
 // ============ ABIs ============
@@ -186,8 +186,8 @@ export function LegacyContribute() {
   const [globalContributed, setGlobalContributed] = useState<bigint>(0n);
   const [globalSBTs, setGlobalSBTs] = useState<bigint>(0n);
 
-  // ETH price for display
-  const [ethPrice, setEthPrice] = useState<number>(2500);
+  // ETH price - live from CoinGecko
+  const [ethPrice, setEthPrice] = useState<number>(1900);
 
   const walletAddress = wallets?.[0]?.address;
 
@@ -266,6 +266,25 @@ export function LegacyContribute() {
   useEffect(() => {
     fetchGlobalStats();
   }, [fetchGlobalStats]);
+
+  // Fetch live ETH price from CoinGecko
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+        const data = await res.json();
+        if (data?.ethereum?.usd) {
+          setEthPrice(data.ethereum.usd);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch ETH price, using default:', ethPrice);
+      }
+    };
+    fetchEthPrice();
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchEthPrice, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (authenticated && walletAddress) {
@@ -485,7 +504,7 @@ export function LegacyContribute() {
                 <Icon className="w-8 h-8 mx-auto mb-2" style={{ color: tier.color }} />
                 <p className="text-white font-bold text-sm">{tier.name}</p>
                 <p className="text-white/60 text-xs mt-1">
-                  {tier.threshold === 0 ? 'Any amount' : `$${tier.threshold.toLocaleString()}+`}
+                  {tier.threshold === 0 ? 'Up to $500' : `$${tier.threshold.toLocaleString()}+`}
                 </p>
               </div>
             );
@@ -611,7 +630,7 @@ export function LegacyContribute() {
                 </div>
                 {paymentMethod === 'ETH' && amount && (
                   <p className="text-xs text-gray-500 mt-1">
-                    ≈ ${(parseFloat(amount) * ethPrice).toLocaleString()} USD (at ${ethPrice.toLocaleString()}/ETH)
+                    ≈ ${(parseFloat(amount) * ethPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })} USD (ETH @ ${ethPrice.toLocaleString()})
                   </p>
                 )}
               </div>
