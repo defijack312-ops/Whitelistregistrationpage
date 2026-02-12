@@ -26,10 +26,10 @@ const CONFIG = {
 
 // Tier thresholds in USDC
 const TIERS = [
-  { id: 1, name: 'Supporter', threshold: 0, maxLabel: '$500', color: '#3B82F6', icon: Shield, description: 'Contribute up to $500 to earn a Supporter badge', badge: '🔵' },
-  { id: 2, name: 'Team Player', threshold: 1000, maxLabel: '$10K', color: '#CD7F32', icon: Users, description: 'Contribute $1,000+ to earn Team Player status', badge: '🟤' },
-  { id: 3, name: 'All-Star', threshold: 10000, maxLabel: '$25K', color: '#C0C0C0', icon: Star, description: 'Contribute $10,000+ to reach All-Star tier', badge: '⚪' },
-  { id: 4, name: 'Legend', threshold: 25000, maxLabel: '∞', color: '#FFD700', icon: Trophy, description: 'Contribute $25,000+ to achieve Legend status', badge: '🟡' },
+  { id: 1, name: 'Supporter', threshold: 0, maxLabel: '$10', color: '#3B82F6', icon: Shield, description: 'Contribute up to $10 to earn a Supporter badge', badge: '🔵' },
+  { id: 2, name: 'Team Player', threshold: 10, maxLabel: '$25', color: '#CD7F32', icon: Users, description: 'Contribute $10+ to earn Team Player status', badge: '🟤' },
+  { id: 3, name: 'All-Star', threshold: 25, maxLabel: '$50', color: '#C0C0C0', icon: Star, description: 'Contribute $25+ to reach All-Star tier', badge: '⚪' },
+  { id: 4, name: 'Legend', threshold: 50, maxLabel: '∞', color: '#FFD700', icon: Trophy, description: 'Contribute $50+ to achieve Legend status', badge: '🟡' },
 ];
 
 // ============ ABIs ============
