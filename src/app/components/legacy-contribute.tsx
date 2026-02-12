@@ -12,16 +12,16 @@ import {
   encodeFunctionData,
   getAddress,
 } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { base } from 'viem/chains';
 import { Wallet, ArrowLeft, Trophy, Star, Shield, Users, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 
 // ============ CONFIG ============
 const CONFIG = {
-  SBT_ADDRESS: '0x314105C2d59f97B829De1D004Db81749Bb26720E' as `0x${string}`,
-  // Base Sepolia USDC (6 decimals)
-  USDC_ADDRESS: '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as `0x${string}`,
-  CHAIN_ID: 84532,
-  RPC_URL: 'https://sepolia.base.org',
+  SBT_ADDRESS: '0x4aaec3c81eC13f735e74A6CcfAB4A0bAb12C4fEd' as `0x${string}`,
+  // Base Mainnet USDC (6 decimals)
+  USDC_ADDRESS: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as `0x${string}`,
+  CHAIN_ID: 8453,
+  RPC_URL: 'https://mainnet.base.org',
 };
 
 // Tier thresholds in USDC
@@ -146,7 +146,7 @@ const ERC20_ABI = [
 ] as const;
 
 const publicClient = createPublicClient({
-  chain: baseSepolia,
+  chain: base,
   transport: http(CONFIG.RPC_URL),
 });
 
@@ -677,7 +677,7 @@ export function LegacyContribute() {
                   {success}
                   {txHash && (
                     <a
-                      href={`https://sepolia.basescan.org/tx/${txHash}`}
+                      href={`https://basescan.org/tx/${txHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block mt-1 text-blue-600 underline text-xs"
