@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useForm } from 'react-hook-form';
 import { Twitter, Mail, Wallet, CheckCircle2, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import PDFModal from './pdf-modal';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { PasscodeGate } from '@/app/components/passcode-gate';
@@ -658,6 +659,12 @@ Join the community preserving the miracle that happened in $1980
             >
               📄 Read the Litepaper
             </button>
+            <Link
+              to="/contribute"
+              className="w-full mt-3 py-3 rounded-xl border-2 border-yellow-500 text-yellow-600 font-bold text-sm hover:bg-yellow-50 transition-all flex items-center justify-center gap-2"
+            >
+              🏒 Legacy Contributions
+            </Link>
           </div>
 
           {/* Footer Quote */}
