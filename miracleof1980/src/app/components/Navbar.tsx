@@ -54,7 +54,7 @@ export function Navbar() {
           <div className="hidden lg:flex items-center gap-1">
             <Link to="/" className={navLinkClass(isActive('/') && !location.hash)}>Home</Link>
             <Link to="/about" className={navLinkClass(isActive('/about'))}>About</Link>
-            <Link to="/roadmap" className={navLinkClass(isActive('/roadmap'))}>Litepaper</Link>
+            <Link to="/whitepaper" className={navLinkClass(isActive('/whitepaper'))}>Whitepaper</Link>
             <Link to="/tokenomics" className={navLinkClass(isActive('/tokenomics'))}>Tokenomics</Link>
 
             {/* Whitelist Dropdown */}
@@ -119,7 +119,7 @@ export function Navbar() {
           <div className="px-4 py-3 space-y-1">
             <Link to="/" className={`block ${navLinkClass(isActive('/') && !location.hash)}`}>Home</Link>
             <Link to="/about" className={`block ${navLinkClass(isActive('/about'))}`}>About</Link>
-            <Link to="/roadmap" className={`block ${navLinkClass(isActive('/roadmap'))}`}>Litepaper</Link>
+            <Link to="/whitepaper" className={`block ${navLinkClass(isActive('/whitepaper'))}`}>Whitepaper</Link>
             <Link to="/tokenomics" className={`block ${navLinkClass(isActive('/tokenomics'))}`}>Tokenomics</Link>
             <div className="text-xs text-white/40 uppercase tracking-wider px-3 pt-3 pb-1">Whitelist</div>
             <Link to="/whitelist" className={`block ${navLinkClass(isActive('/whitelist'))} pl-6`}>Register</Link>

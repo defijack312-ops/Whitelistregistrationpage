@@ -1,10 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import PDFModal from './pdf-modal';
-import { Users, Trophy, Star, Shield, Coins, BarChart3, FileText, ArrowRight, Sparkles } from 'lucide-react';
+import { Users, Trophy, Star, Shield, Coins, BarChart3, FileText, ArrowRight, Sparkles, Download } from 'lucide-react';
 
 export function LandingPage() {
-  const [showPDF, setShowPDF] = useState(false);
   const location = useLocation();
 
   // Scroll to hash section on load or hash change
@@ -41,9 +39,9 @@ export function LandingPage() {
             <Link to="/whitelist" className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-bold py-4 px-8 rounded-xl transition-all shadow-lg text-lg flex items-center gap-2">
               Join the Whitelist <ArrowRight className="w-5 h-5" />
             </Link>
-            <button onClick={() => setShowPDF(true)} className="bg-white/10 hover:bg-white/20 text-white font-bold py-4 px-8 rounded-xl transition-all border-2 border-white/30 text-lg cursor-pointer flex items-center gap-2">
-              <FileText className="w-5 h-5" /> Read the Litepaper
-            </button>
+            <Link to="/whitepaper" className="bg-white/10 hover:bg-white/20 text-white font-bold py-4 px-8 rounded-xl transition-all border-2 border-white/30 text-lg flex items-center gap-2">
+              <FileText className="w-5 h-5" /> Read the Whitepaper
+            </Link>
           </div>
 
           <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
@@ -152,22 +150,22 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Litepaper / Roadmap Teaser */}
+      {/* Whitepaper & Roadmap Teaser */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 sm:p-10 border-2 border-blue-600/30 text-center">
             <FileText className="w-12 h-12 text-red-600 mx-auto mb-4" />
-            <h2 className="text-3xl font-black text-gray-900 mb-3">Litepaper & Roadmap</h2>
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Whitepaper & Roadmap</h2>
             <p className="text-gray-600 text-lg mb-6 max-w-xl mx-auto">
-              Read our comprehensive litepaper and explore the full project roadmap — from foundation through expansion.
+              Read our comprehensive whitepaper covering tokenomics, sale mechanics, SBT rewards, DAO governance, and the full project roadmap.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button onClick={() => setShowPDF(true)} className="bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer">
-                <FileText className="w-5 h-5" /> View Litepaper
-              </button>
-              <Link to="/roadmap" className="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
-                View Full Roadmap <ArrowRight className="w-5 h-5" />
+              <Link to="/whitepaper" className="bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                <FileText className="w-5 h-5" /> Read the Whitepaper
               </Link>
+              <a href="/1980_litepaper.pdf" download className="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                <Download className="w-5 h-5" /> Download PDF
+              </a>
             </div>
           </div>
         </div>
@@ -224,8 +222,6 @@ export function LandingPage() {
         </div>
       </footer>
 
-      {/* PDF Modal */}
-      <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
     </>
   );
 }

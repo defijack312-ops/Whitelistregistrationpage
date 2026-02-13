@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useForm } from 'react-hook-form';
-import { Twitter, Mail, Wallet, CheckCircle2, Loader2 } from 'lucide-react';
+import { Twitter, Mail, Wallet, CheckCircle2, Loader2, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import PDFModal from './pdf-modal';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { PasscodeGate } from '@/app/components/passcode-gate';
 import { PrivyDiagnostic } from '@/app/components/privy-diagnostic';
@@ -37,8 +36,6 @@ export function WhitelistPage() {
   // Registration status
   const [registrationStatus, setRegistrationStatus] = useState<RegistrationStatus | null>(null);
   const [checkingRegistration, setCheckingRegistration] = useState(false);
-  const [showPDF, setShowPDF] = useState(false);
-
   // Show diagnostic if Privy doesn't load within 15 seconds (extended timeout for production)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -457,13 +454,13 @@ Join the community preserving the miracle that happened in $1980
               </p>
             </div>
 
-            {/* Litepaper Button */}
-            <button
-              onClick={() => setShowPDF(true)}
+            {/* Whitepaper Button */}
+            <Link
+              to="/whitepaper"
               className="w-full mt-4 py-3 rounded-xl border-2 border-blue-600 text-blue-700 font-bold text-sm hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
             >
-              📄 Read the Litepaper
-            </button>
+              <FileText className="w-4 h-4" /> Read the Whitepaper
+            </Link>
             <Link
               to="/contribute"
               className="w-full mt-3 py-3 rounded-xl border-2 border-yellow-500 text-yellow-600 font-bold text-sm hover:bg-yellow-50 transition-all flex items-center justify-center gap-2"
@@ -475,8 +472,6 @@ Join the community preserving the miracle that happened in $1980
         </div>
       </div>
 
-      {/* PDF Modal */}
-      <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
     </>
   );
 }
