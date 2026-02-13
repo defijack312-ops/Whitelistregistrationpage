@@ -79,7 +79,7 @@ export function Navbar() {
             <Link to="/sale" className={navLinkClass(isActive('/sale'))}>Token Sale</Link>
             <Link to="/#about" className={navLinkClass(isHashActive('#about'))}>About</Link>
             <Link to="/#tokenomics" className={navLinkClass(isHashActive('#tokenomics'))}>Tokenomics</Link>
-            <Link to="/#litepaper" className={navLinkClass(isHashActive('#litepaper'))}>Litepaper</Link>
+            <Link to="/roadmap" className={navLinkClass(isActive('/roadmap'))}>Litepaper</Link>
             <Link to="/contribute" className={navLinkClass(isActive('/contribute'))}>Contribute</Link>
           </div>
 
@@ -124,7 +124,7 @@ export function Navbar() {
             <Link to="/sale" className={`block ${navLinkClass(isActive('/sale'))}`}>Token Sale</Link>
             <Link to="/#about" className={`block ${navLinkClass(false)}`}>About</Link>
             <Link to="/#tokenomics" className={`block ${navLinkClass(false)}`}>Tokenomics</Link>
-            <Link to="/#litepaper" className={`block ${navLinkClass(false)}`}>Litepaper</Link>
+            <Link to="/roadmap" className={`block ${navLinkClass(isActive('/roadmap'))}`}>Litepaper</Link>
             <Link to="/contribute" className={`block ${navLinkClass(isActive('/contribute'))}`}>Contribute</Link>
 
             {/* Mobile Wallet */}

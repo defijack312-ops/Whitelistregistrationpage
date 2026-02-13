@@ -211,65 +211,22 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Litepaper / Roadmap Section */}
-      <section id="litepaper" className="py-20 px-4">
+      {/* Litepaper / Roadmap Teaser */}
+      <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">Litepaper & Roadmap</h2>
-            <div className="h-1 w-24 bg-yellow-500 mx-auto rounded" />
-          </div>
-
-          <div className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 sm:p-10 border-2 border-blue-600/30">
-            <p className="text-gray-700 text-lg text-center mb-8">
-              Our comprehensive litepaper covers the full tokenomics, sale mechanics, SBT reward system,
-              DAO governance structure, and project roadmap.
+          <div className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 sm:p-10 border-2 border-blue-600/30 text-center">
+            <FileText className="w-12 h-12 text-red-600 mx-auto mb-4" />
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Litepaper & Roadmap</h2>
+            <p className="text-gray-600 text-lg mb-6 max-w-xl mx-auto">
+              Read our comprehensive litepaper and explore the full project roadmap — from foundation through expansion.
             </p>
-
-            <div className="flex justify-center mb-10">
-              <button onClick={() => setShowPDF(true)} className="bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold py-4 px-10 rounded-xl transition-all shadow-lg text-lg flex items-center gap-3 cursor-pointer">
-                <FileText className="w-6 h-6" /> View the Full Litepaper
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button onClick={() => setShowPDF(true)} className="bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+                <FileText className="w-5 h-5" /> View Litepaper
               </button>
-            </div>
-
-            {/* Roadmap */}
-            <h3 className="text-xl font-black text-gray-900 mb-6 text-center">Roadmap</h3>
-            <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-green-100 border-2 border-green-500 rounded-full flex items-center justify-center shrink-0 mt-1">
-                  <span className="text-green-600 text-lg">✓</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Phase 1 — Foundation</h4>
-                  <p className="text-sm text-gray-600">LLC formation, smart contract development, litepaper, whitelist registration, SBT reward system, testnet deployment</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-yellow-100 border-2 border-yellow-500 rounded-full flex items-center justify-center shrink-0 mt-1">
-                  <span className="text-yellow-600 text-lg">→</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Phase 2 — Launch</h4>
-                  <p className="text-sm text-gray-600">Mainnet deployment, token access sale, liquidity provision, Aerodrome pool setup, security review</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-gray-100 border-2 border-gray-300 rounded-full flex items-center justify-center shrink-0 mt-1">
-                  <span className="text-gray-400 text-lg">○</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Phase 3 — Community</h4>
-                  <p className="text-sm text-gray-600">DAO activation, community governance, legacy preservation initiatives, athlete engagement, educational programs</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-gray-100 border-2 border-gray-300 rounded-full flex items-center justify-center shrink-0 mt-1">
-                  <span className="text-gray-400 text-lg">○</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Phase 4 — Expansion</h4>
-                  <p className="text-sm text-gray-600">Cross-platform community building, partnerships, commemorative events, expanded DAO scope</p>
-                </div>
-              </div>
+              <Link to="/roadmap" className="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                View Full Roadmap <ArrowRight className="w-5 h-5" />
+              </Link>
             </div>
           </div>
         </div>

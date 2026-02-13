@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { LandingPage } from './components/LandingPage';
+import { RoadmapPage } from './components/RoadmapPage';
 import { WhitelistPage } from '@/app/components/whitelist-page';
 import { TokenSale } from './components/token-sale';
 import { LegacyContribute } from './components/legacy-contribute';
@@ -58,6 +59,7 @@ export default function App() {
                 <Route path="/dashboard" element={<WhitelistPage />} />
                 <Route path="/sale" element={<TokenSale />} />
                 <Route path="/contribute" element={<LegacyContribute />} />
+                <Route path="/roadmap" element={<RoadmapPage />} />
               </Routes>
             </Layout>
             <Analytics />
