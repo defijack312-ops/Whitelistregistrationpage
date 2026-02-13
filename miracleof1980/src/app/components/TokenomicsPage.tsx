@@ -70,28 +70,28 @@ export function TokenomicsPage() {
                     <td className="py-3 px-4">No vesting</td>
                   </tr>
                   <tr className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">DAO Participation</td>
+                    <td className="py-3 px-4 font-medium text-gray-900">DAO Participation & Grants</td>
                     <td className="text-right py-3 px-4">15%</td>
                     <td className="text-right py-3 px-4">297M</td>
-                    <td className="py-3 px-4">36–60 months</td>
+                    <td className="py-3 px-4">3-mo cliff, 12-mo vest</td>
                   </tr>
                   <tr className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">Athlete & Legacy</td>
+                    <td className="py-3 px-4 font-medium text-gray-900">Athlete & Legacy Treasury</td>
                     <td className="text-right py-3 px-4">19.8%</td>
                     <td className="text-right py-3 px-4">392M</td>
-                    <td className="py-3 px-4">12mo cliff, 48mo vest</td>
+                    <td className="py-3 px-4">25% at TGE, 75% monthly over 12mo</td>
                   </tr>
                   <tr className="border-b border-gray-100">
                     <td className="py-3 px-4 font-medium text-gray-900">Foundation & Ops</td>
                     <td className="text-right py-3 px-4">5.2%</td>
                     <td className="text-right py-3 px-4">103M</td>
-                    <td className="py-3 px-4">48 months linear</td>
+                    <td className="py-3 px-4">24-month linear</td>
                   </tr>
                   <tr>
-                    <td className="py-3 px-4 font-medium text-gray-900">Community Reserve</td>
+                    <td className="py-3 px-4 font-medium text-gray-900">DAO Treasury</td>
                     <td className="text-right py-3 px-4">40%</td>
                     <td className="text-right py-3 px-4">792M</td>
-                    <td className="py-3 px-4">Future use</td>
+                    <td className="py-3 px-4">Governed by DAO vote</td>
                   </tr>
                 </tbody>
               </table>
@@ -226,25 +226,25 @@ export function TokenomicsPage() {
             <div className="bg-white/95 backdrop-blur rounded-xl p-5 text-center border-2 border-blue-400 shadow-lg">
               <div className="text-3xl mb-2">🔵</div>
               <h4 className="font-bold text-gray-900">Supporter</h4>
-              <p className="text-xs text-gray-600 mt-1">Up to $10</p>
+              <p className="text-xs text-gray-600 mt-1">Any amount</p>
               <p className="text-xs text-blue-600 mt-2 font-semibold">Entry Level</p>
             </div>
             <div className="bg-white/95 backdrop-blur rounded-xl p-5 text-center border-2 border-amber-600 shadow-lg">
               <div className="text-3xl mb-2">🟤</div>
               <h4 className="font-bold text-gray-900">Team Player</h4>
-              <p className="text-xs text-gray-600 mt-1">$10+</p>
+              <p className="text-xs text-gray-600 mt-1">$1,000+</p>
               <p className="text-xs text-amber-700 mt-2 font-semibold">Growing Impact</p>
             </div>
             <div className="bg-white/95 backdrop-blur rounded-xl p-5 text-center border-2 border-gray-400 shadow-lg">
               <div className="text-3xl mb-2">⚪</div>
               <h4 className="font-bold text-gray-900">All-Star</h4>
-              <p className="text-xs text-gray-600 mt-1">$25+</p>
+              <p className="text-xs text-gray-600 mt-1">$5,000+</p>
               <p className="text-xs text-gray-600 mt-2 font-semibold">Dedicated Supporter</p>
             </div>
             <div className="bg-white/95 backdrop-blur rounded-xl p-5 text-center border-2 border-yellow-400 shadow-lg">
               <div className="text-3xl mb-2">🟡</div>
               <h4 className="font-bold text-gray-900">Legend</h4>
-              <p className="text-xs text-gray-600 mt-1">$50+</p>
+              <p className="text-xs text-gray-600 mt-1">$25,000+</p>
               <p className="text-xs text-yellow-600 mt-2 font-semibold">Legacy Champion</p>
             </div>
           </div>
@@ -283,7 +283,7 @@ export function TokenomicsPage() {
                   <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0">3</div>
                   <h4 className="font-bold text-gray-900">Keep Contributing to Level Up</h4>
                 </div>
-                <p className="text-sm text-gray-600 ml-11">Your contributions are cumulative. A $5 contribution followed by another $5 equals $10 total — enough to reach Team Player.</p>
+                <p className="text-sm text-gray-600 ml-11">Your contributions are cumulative. A $500 contribution followed by another $500 equals $1,000 total — enough to reach Team Player.</p>
               </div>
 
               <div className="flex justify-center"><ArrowDown className="w-5 h-5 text-white/60" /></div>
@@ -294,7 +294,7 @@ export function TokenomicsPage() {
                   <div className="w-8 h-8 rounded-full bg-yellow-500 text-black flex items-center justify-center font-bold text-sm shrink-0">⚡</div>
                   <h4 className="font-bold text-gray-900">Overflow Minting</h4>
                 </div>
-                <p className="text-sm text-gray-600 ml-11">Large contributions that exceed a tier threshold generate additional SBTs. For example, a $120 contribution creates 2 Legend SBTs ($50 each) plus an All-Star SBT for the remaining $20. This rewards generous contributors with multiple badges.</p>
+                <p className="text-sm text-gray-600 ml-11">Large contributions that exceed a tier threshold generate additional SBTs. For example, a $60,000 contribution creates 2 Legend SBTs ($25,000 each) plus an All-Star SBT for the remaining $10,000. This rewards generous contributors with multiple badges.</p>
               </div>
             </div>
 
@@ -304,25 +304,25 @@ export function TokenomicsPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0">
                 <div className="text-center px-3">
                   <div className="text-2xl">🔵</div>
-                  <p className="text-xs text-gray-600 mt-1">$5 first<br/>contribution</p>
+                  <p className="text-xs text-gray-600 mt-1">$100 first<br/>contribution</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 hidden sm:block" />
                 <ArrowDown className="w-5 h-5 text-gray-400 sm:hidden" />
                 <div className="text-center px-3">
                   <div className="text-2xl">🟤</div>
-                  <p className="text-xs text-gray-600 mt-1">$5 more<br/>= $10 total</p>
+                  <p className="text-xs text-gray-600 mt-1">$900 more<br/>= $1K total</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 hidden sm:block" />
                 <ArrowDown className="w-5 h-5 text-gray-400 sm:hidden" />
                 <div className="text-center px-3">
                   <div className="text-2xl">⚪</div>
-                  <p className="text-xs text-gray-600 mt-1">$15 more<br/>= $25 total</p>
+                  <p className="text-xs text-gray-600 mt-1">$4K more<br/>= $5K total</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 hidden sm:block" />
                 <ArrowDown className="w-5 h-5 text-gray-400 sm:hidden" />
                 <div className="text-center px-3">
                   <div className="text-2xl">🟡</div>
-                  <p className="text-xs text-gray-600 mt-1">$25 more<br/>= $50 total</p>
+                  <p className="text-xs text-gray-600 mt-1">$20K more<br/>= $25K total</p>
                 </div>
               </div>
               <p className="text-xs text-gray-500 text-center mt-4">Each upgrade replaces your previous SBT — you always hold your highest tier badge.</p>

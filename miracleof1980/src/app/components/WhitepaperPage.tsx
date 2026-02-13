@@ -145,22 +145,22 @@ export function WhitepaperPage() {
                 </thead>
                 <tbody className="text-gray-600">
                   <tr className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">Community Reserve</td>
+                    <td className="py-3 px-4 font-medium text-gray-900">DAO Treasury</td>
                     <td className="text-right py-3 px-4">40%</td>
                     <td className="text-right py-3 px-4">792,000,000</td>
-                    <td className="py-3 px-4">Future use</td>
+                    <td className="py-3 px-4">Governed by DAO vote</td>
                   </tr>
                   <tr className="border-b border-gray-100">
                     <td className="py-3 px-4 font-medium text-gray-900">Athlete & Legacy Treasury</td>
                     <td className="text-right py-3 px-4">19.8%</td>
                     <td className="text-right py-3 px-4">392,040,000</td>
-                    <td className="py-3 px-4">12-mo cliff + 48-mo linear</td>
+                    <td className="py-3 px-4">25% at TGE, 75% monthly over 12mo</td>
                   </tr>
                   <tr className="border-b border-gray-100">
                     <td className="py-3 px-4 font-medium text-gray-900">DAO Participation & Grants</td>
                     <td className="text-right py-3 px-4">15%</td>
                     <td className="text-right py-3 px-4">297,000,000</td>
-                    <td className="py-3 px-4">36–60 month linear</td>
+                    <td className="py-3 px-4">3-mo cliff, 12-mo vest</td>
                   </tr>
                   <tr className="border-b border-gray-100">
                     <td className="py-3 px-4 font-medium text-gray-900">Initial Access Sale</td>
@@ -178,7 +178,7 @@ export function WhitepaperPage() {
                     <td className="py-3 px-4 font-medium text-gray-900">Foundation & Operations</td>
                     <td className="text-right py-3 px-4">5.2%</td>
                     <td className="text-right py-3 px-4">102,960,000</td>
-                    <td className="py-3 px-4">48-month linear</td>
+                    <td className="py-3 px-4">24-month linear</td>
                   </tr>
                 </tbody>
               </table>
