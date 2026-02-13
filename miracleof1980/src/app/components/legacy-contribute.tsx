@@ -169,7 +169,7 @@ export function LegacyContribute() {
   const [txHash, setTxHash] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showPDF, setShowPDF] = useState(false);
+
 
   // User data
   const [userStats, setUserStats] = useState<{
@@ -768,8 +768,6 @@ export function LegacyContribute() {
 
       </div>
 
-      {/* PDF Modal */}
-      <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
     </div>
   );
 }
