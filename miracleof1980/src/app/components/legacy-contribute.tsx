@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Link } from 'react-router-dom';
-import PDFModal from './pdf-modal';
+
 import {
   createPublicClient,
   http,
@@ -194,7 +194,10 @@ export function LegacyContribute() {
   // ETH price - live from CoinGecko
   const [ethPrice, setEthPrice] = useState<number>(1900);
 
-  const walletAddress = wallets?.[0]?.address;
+  // Prefer external wallet (MetaMask) over Privy embedded wallet
+  const externalWallet = wallets?.find(w => w.walletClientType !== 'privy');
+  const activeWallet = externalWallet || wallets?.[0];
+  const walletAddress = activeWallet?.address;
 
   // ============ DATA FETCHING ============
   const fetchUserData = useCallback(async () => {
@@ -304,7 +307,7 @@ export function LegacyContribute() {
     setSuccess('');
     setTxHash('');
 
-    const wallet = wallets[0];
+    const wallet = activeWallet;
     if (!wallet) return;
 
     try {
