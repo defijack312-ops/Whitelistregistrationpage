@@ -9,16 +9,21 @@ export function Navbar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [whitelistOpen, setWhitelistOpen] = useState(false);
+  const [tokenSbtOpen, setTokenSbtOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const tokenSbtRef = useRef<HTMLDivElement>(null);
 
   const externalWallet = wallets.find(w => w.walletClientType !== 'privy');
   const address = externalWallet?.address || wallets[0]?.address;
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setWhitelistOpen(false);
+      }
+      if (tokenSbtRef.current && !tokenSbtRef.current.contains(e.target as Node)) {
+        setTokenSbtOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -29,6 +34,7 @@ export function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setWhitelistOpen(false);
+    setTokenSbtOpen(false);
   }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
@@ -79,8 +85,27 @@ export function Navbar() {
               )}
             </div>
 
-            <Link to="/sale" className={navLinkClass(isActive('/sale'))}>Token Sale</Link>
-            <Link to="/contribute" className={navLinkClass(isActive('/contribute'))}>Contribute</Link>
+            {/* Token & SBT Dropdown */}
+            <div className="relative" ref={tokenSbtRef}>
+              <button
+                onClick={() => setTokenSbtOpen(!tokenSbtOpen)}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1 ${
+                  isActive('/sale') || isActive('/contribute') ? 'text-yellow-400 bg-white/10' : 'text-white/80 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                Token & SBT <ChevronDown className={`w-3.5 h-3.5 transition-transform ${tokenSbtOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {tokenSbtOpen && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-gray-900/95 backdrop-blur-lg rounded-xl border border-white/10 shadow-2xl overflow-hidden">
+                  <Link to="/sale" className="block px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors">
+                    $1980 Sale
+                  </Link>
+                  <Link to="/contribute" className="block px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors border-t border-white/5">
+                    Legacy SBT Mint
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Wallet Button + Mobile Toggle */}
@@ -124,8 +149,9 @@ export function Navbar() {
             <div className="text-xs text-white/40 uppercase tracking-wider px-3 pt-3 pb-1">Whitelist</div>
             <Link to="/whitelist" className={`block ${navLinkClass(isActive('/whitelist'))} pl-6`}>Register</Link>
             <Link to="/dashboard" className={`block ${navLinkClass(isActive('/dashboard'))} pl-6`}>Manage Wallet</Link>
-            <Link to="/sale" className={`block ${navLinkClass(isActive('/sale'))}`}>Token Sale</Link>
-            <Link to="/contribute" className={`block ${navLinkClass(isActive('/contribute'))}`}>Contribute</Link>
+            <div className="text-xs text-white/40 uppercase tracking-wider px-3 pt-3 pb-1">Token & SBT</div>
+            <Link to="/sale" className={`block ${navLinkClass(isActive('/sale'))} pl-6`}>$1980 Sale</Link>
+            <Link to="/contribute" className={`block ${navLinkClass(isActive('/contribute'))} pl-6`}>Legacy SBT Mint</Link>
 
             {/* Mobile Wallet */}
             <div className="pt-3 border-t border-white/10">
