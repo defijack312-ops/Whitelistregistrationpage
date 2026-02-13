@@ -311,6 +311,8 @@ export function LegacyContribute() {
     if (!wallet) return;
 
     try {
+      // Ensure wallet is on Base mainnet
+      await wallet.switchChain(CONFIG.CHAIN_ID);
       const provider = await wallet.getEthereumProvider();
 
       if (paymentMethod === 'USDC') {
