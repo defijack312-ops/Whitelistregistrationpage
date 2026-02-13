@@ -720,6 +720,11 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
         </div>
       </div>
 
+      {/* Footer */}
+      <div className="mt-6 pt-4 border-t border-white/20 text-center">
+        <p className="text-white/50 text-sm">© {new Date().getFullYear()} Miracle of 1980 LLC. All rights reserved.</p>
+      </div>
+
       {/* PDF Modal */}
       <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
     </>
