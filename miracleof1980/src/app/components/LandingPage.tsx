@@ -184,22 +184,22 @@ export function LandingPage() {
             <div className="bg-white/95 backdrop-blur rounded-xl p-5 text-center border-2 border-blue-400 shadow-lg">
               <div className="text-3xl mb-2">🔵</div>
               <h4 className="font-bold text-gray-900">Supporter</h4>
-              <p className="text-xs text-gray-600 mt-1">Up to $10</p>
+              <p className="text-xs text-gray-600 mt-1">Any amount</p>
             </div>
             <div className="bg-white/95 backdrop-blur rounded-xl p-5 text-center border-2 border-amber-600 shadow-lg">
               <div className="text-3xl mb-2">🟤</div>
               <h4 className="font-bold text-gray-900">Team Player</h4>
-              <p className="text-xs text-gray-600 mt-1">$10+</p>
+              <p className="text-xs text-gray-600 mt-1">$1,000+</p>
             </div>
             <div className="bg-white/95 backdrop-blur rounded-xl p-5 text-center border-2 border-gray-400 shadow-lg">
               <div className="text-3xl mb-2">⚪</div>
               <h4 className="font-bold text-gray-900">All-Star</h4>
-              <p className="text-xs text-gray-600 mt-1">$25+</p>
+              <p className="text-xs text-gray-600 mt-1">$5,000+</p>
             </div>
             <div className="bg-white/95 backdrop-blur rounded-xl p-5 text-center border-2 border-yellow-400 shadow-lg">
               <div className="text-3xl mb-2">🟡</div>
               <h4 className="font-bold text-gray-900">Legend</h4>
-              <p className="text-xs text-gray-600 mt-1">$50+</p>
+              <p className="text-xs text-gray-600 mt-1">$25,000+</p>
             </div>
           </div>
 
