@@ -3,6 +3,8 @@ import { WagmiProvider, createConfig, http } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Layout } from './components/Layout';
+import { LandingPage } from './components/LandingPage';
 import { WhitelistPage } from '@/app/components/whitelist-page';
 import { TokenSale } from './components/token-sale';
 import { LegacyContribute } from './components/legacy-contribute';
@@ -23,11 +25,10 @@ const privyAppId = import.meta.env.VITE_PRIVY_APP_ID || 'cmkydhjjw00y2lg0dmzcbjp
 
 // Login methods configuration
 const loginMethods: ('wallet' | 'email' | 'google' | 'twitter')[] = [
-  'wallet',  // Always works - no setup needed
-  'email',   // Always works - no setup needed
-  // Uncomment after setting up OAuth in Privy dashboard:
-   'google',
-   'twitter',
+  'wallet',
+  'email',
+  'google',
+  'twitter',
 ];
 
 export default function App() {
@@ -50,11 +51,15 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <WagmiProvider config={config}>
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<WhitelistPage />} />
-              <Route path="/sale" element={<TokenSale />} />
-              <Route path="/contribute" element={<LegacyContribute />} />
-            </Routes>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/whitelist" element={<WhitelistPage />} />
+                <Route path="/dashboard" element={<WhitelistPage />} />
+                <Route path="/sale" element={<TokenSale />} />
+                <Route path="/contribute" element={<LegacyContribute />} />
+              </Routes>
+            </Layout>
             <Analytics />
           </BrowserRouter>
         </WagmiProvider>
