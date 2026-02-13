@@ -46,14 +46,14 @@ export function Navbar() {
     }`;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/90 backdrop-blur-lg border-b border-white/10">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-blue-900/85 backdrop-blur-lg border-b border-blue-400/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <span className="text-3xl font-black text-white tracking-tight">1980</span>
-            <span className="hidden sm:block text-xs text-blue-300 font-semibold leading-tight">MIRACLE<br/>ON ICE</span>
+            <span className="text-3xl font-black text-white tracking-tight">$1980</span>
+            <span className="hidden sm:block text-xs text-yellow-400 font-bold leading-tight tracking-wide">MIRACLE</span>
           </Link>
 
           {/* Desktop Nav */}
