@@ -7,6 +7,7 @@ import { Layout } from './components/Layout';
 import { LandingPage } from './components/LandingPage';
 import { RoadmapPage } from './components/RoadmapPage';
 import { AboutPage } from './components/AboutPage';
+import { TokenomicsPage } from './components/TokenomicsPage';
 import { WhitelistPage } from '@/app/components/whitelist-page';
 import { TokenSale } from './components/token-sale';
 import { LegacyContribute } from './components/legacy-contribute';
@@ -62,6 +63,7 @@ export default function App() {
                 <Route path="/contribute" element={<LegacyContribute />} />
                 <Route path="/roadmap" element={<RoadmapPage />} />
                 <Route path="/about" element={<AboutPage />} />
+                <Route path="/tokenomics" element={<TokenomicsPage />} />
               </Routes>
             </Layout>
             <Analytics />

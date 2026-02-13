@@ -111,7 +111,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Tokenomics Section */}
+      {/* Tokenomics Section — Teaser */}
       <section id="tokenomics" className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -120,17 +120,21 @@ export function LandingPage() {
           </div>
 
           <div className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 sm:p-10 border-2 border-blue-600/30">
+            <p className="text-gray-700 text-lg leading-relaxed mb-6">
+              A fixed supply of 1.98 billion tokens — minted once, never inflated. Community-governed through a DAO funded by a 1.98% DEX tax, with 19.8% reserved for athletes and their families.
+            </p>
+
             {/* Key Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
               <div className="bg-gray-50 rounded-xl p-5 text-center border-2 border-gray-200">
                 <Coins className="w-6 h-6 text-yellow-600 mx-auto mb-2" />
                 <p className="text-3xl font-black text-gray-900">1.98B</p>
-                <p className="text-sm text-gray-600 mt-1">Total Supply — Fixed, Never Changing</p>
+                <p className="text-sm text-gray-600 mt-1">Total Supply — Fixed Forever</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-5 text-center border-2 border-gray-200">
                 <BarChart3 className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                <p className="text-3xl font-black text-gray-900">10%</p>
-                <p className="text-sm text-gray-600 mt-1">Initial Access — 198M Tokens</p>
+                <p className="text-3xl font-black text-gray-900">19.8%</p>
+                <p className="text-sm text-gray-600 mt-1">Athlete & Legacy Fund</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-5 text-center border-2 border-gray-200">
                 <Star className="w-6 h-6 text-red-600 mx-auto mb-2" />
@@ -139,74 +143,10 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Distribution Table */}
-            <h3 className="text-xl font-black text-gray-900 mb-4">Distribution Breakdown</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left py-3 px-4 font-bold text-gray-700">Allocation</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-700">%</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-700">Tokens</th>
-                    <th className="text-left py-3 px-4 font-bold text-gray-700">Vesting</th>
-                  </tr>
-                </thead>
-                <tbody className="text-gray-600">
-                  <tr className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">Initial Access Sales</td>
-                    <td className="text-right py-3 px-4">10%</td>
-                    <td className="text-right py-3 px-4">198M</td>
-                    <td className="py-3 px-4">No vesting</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">Future Access Sales</td>
-                    <td className="text-right py-3 px-4">10%</td>
-                    <td className="text-right py-3 px-4">198M</td>
-                    <td className="py-3 px-4">No vesting</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">DAO Participation</td>
-                    <td className="text-right py-3 px-4">15%</td>
-                    <td className="text-right py-3 px-4">297M</td>
-                    <td className="py-3 px-4">36–60 months</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">Athlete & Legacy</td>
-                    <td className="text-right py-3 px-4">19.8%</td>
-                    <td className="text-right py-3 px-4">392M</td>
-                    <td className="py-3 px-4">12mo cliff, 48mo vest</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">Foundation & Ops</td>
-                    <td className="text-right py-3 px-4">5.2%</td>
-                    <td className="text-right py-3 px-4">103M</td>
-                    <td className="py-3 px-4">48 months linear</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-4 font-medium text-gray-900">Community Reserve</td>
-                    <td className="text-right py-3 px-4">40%</td>
-                    <td className="text-right py-3 px-4">792M</td>
-                    <td className="py-3 px-4">Future use</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* DAO Governance Brief */}
-            <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-200">
-              <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-blue-600" /> DAO Governance
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-semibold text-gray-800 mb-2">What the DAO controls:</p>
-                  <p className="text-gray-600">Budget allocation, community events, grant distribution, educational content, and historical preservation initiatives.</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-800 mb-2">What the DAO does NOT control:</p>
-                  <p className="text-gray-600">Token price, market operations, liquidity tactics, athlete participation, or MERC token modifications.</p>
-                </div>
-              </div>
+            <div className="text-center">
+              <Link to="/tokenomics" className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg">
+                View Full Tokenomics & SBT System <ArrowRight className="w-5 h-5" />
+              </Link>
             </div>
           </div>
         </div>

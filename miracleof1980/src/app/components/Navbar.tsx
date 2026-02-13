@@ -55,7 +55,7 @@ export function Navbar() {
             <Link to="/" className={navLinkClass(isActive('/') && !location.hash)}>Home</Link>
             <Link to="/about" className={navLinkClass(isActive('/about'))}>About</Link>
             <Link to="/roadmap" className={navLinkClass(isActive('/roadmap'))}>Litepaper</Link>
-            <Link to="/#tokenomics" className={navLinkClass(isHashActive('#tokenomics'))}>Tokenomics</Link>
+            <Link to="/tokenomics" className={navLinkClass(isActive('/tokenomics'))}>Tokenomics</Link>
 
             {/* Whitelist Dropdown */}
             <div className="relative" ref={dropdownRef}>
@@ -120,7 +120,7 @@ export function Navbar() {
             <Link to="/" className={`block ${navLinkClass(isActive('/') && !location.hash)}`}>Home</Link>
             <Link to="/about" className={`block ${navLinkClass(isActive('/about'))}`}>About</Link>
             <Link to="/roadmap" className={`block ${navLinkClass(isActive('/roadmap'))}`}>Litepaper</Link>
-            <Link to="/#tokenomics" className={`block ${navLinkClass(false)}`}>Tokenomics</Link>
+            <Link to="/tokenomics" className={`block ${navLinkClass(isActive('/tokenomics'))}`}>Tokenomics</Link>
             <div className="text-xs text-white/40 uppercase tracking-wider px-3 pt-3 pb-1">Whitelist</div>
             <Link to="/whitelist" className={`block ${navLinkClass(isActive('/whitelist'))} pl-6`}>Register</Link>
             <Link to="/dashboard" className={`block ${navLinkClass(isActive('/dashboard'))} pl-6`}>Manage Wallet</Link>
