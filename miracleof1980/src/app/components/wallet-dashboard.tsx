@@ -3,7 +3,6 @@ import { usePrivy, useWallets, useFundWallet } from '@privy-io/react-auth';
 import PDFModal from './pdf-modal';
 import { Wallet, Key, Copy, CheckCircle2, ExternalLink, LogOut, Shield, Clock, Twitter, AlertCircle, CreditCard, Coins, ArrowDownUp, Loader2 } from 'lucide-react';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
-import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 import mercLogo from '@/assets/merc-logo.svg';
 import { encodeFunctionData, decodeFunctionResult, getAddress } from 'viem';
 
@@ -467,21 +466,8 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-red-900 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 35px, white 35px, white 37px)' }} />
-        <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 35px, white 35px, white 37px)' }} />
-      </div>
-      <div className="absolute inset-0 z-0">
-        <img src={teamPhoto} alt="1980 USA Hockey Team" className="w-full h-full object-cover opacity-30" />
-      </div>
-      <div className="absolute top-6 right-6 z-20">
-        <button onClick={logout} className="flex items-center gap-2 bg-gray-800/90 backdrop-blur rounded-xl px-4 py-2 text-gray-300 hover:text-white transition-colors">
-          <LogOut className="w-4 h-4" /> Sign Out
-        </button>
-      </div>
-
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 py-20">
+    <>
+      <div className="min-h-screen flex items-center justify-center p-4 py-8">
         <div className="max-w-2xl w-full">
           <div className="text-center mb-8">
             <div className="inline-block mb-6">
@@ -731,22 +717,11 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
             </div>
           </div>
 
-          <div className="mt-8 text-center">
-            <p className="text-white/90 text-lg sm:text-xl font-bold italic drop-shadow-lg">"Do you believe in miracles? YES!"</p>
-            <p className="text-blue-200 text-sm mt-2">- Al Michaels, February 22, 1980</p>
-          </div>
-
-          {/* Company Footer */}
-          <div className="mt-6 pt-4 border-t border-white/20 text-center">
-            <p className="text-white/50 text-sm">
-              © {new Date().getFullYear()} Miracle of 1980 LLC. All rights reserved.
-            </p>
-          </div>
         </div>
       </div>
 
       {/* PDF Modal */}
       <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
-    </div>
+    </>
   );
 }

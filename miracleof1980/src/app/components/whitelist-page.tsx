@@ -10,7 +10,6 @@ import { PrivyDiagnostic } from '@/app/components/privy-diagnostic';
 import { WalletDashboard } from '@/app/components/wallet-dashboard';
 import { WHITELIST_CONFIG, validatePasscode, markCodeAsUsed } from '@/app/components/whitelist-config';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
-import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
 
 interface FormData {
   walletAddress: string;
@@ -270,7 +269,7 @@ export function WhitelistPage() {
   // Show loading while checking registration
   if (isConnected && checkingRegistration) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-red-900 p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 text-center">
           <Loader2 className="w-16 h-16 mx-auto mb-6 text-blue-600 animate-spin" />
           <h2 className="text-2xl mb-4 text-gray-900">Checking Registration...</h2>
@@ -284,7 +283,7 @@ export function WhitelistPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-red-900 p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 text-center">
           <CheckCircle2 className="w-20 h-20 mx-auto mb-6 text-green-600" />
           <h2 className="text-3xl mb-4 text-gray-900">You're On The List! 🏒</h2>
@@ -316,90 +315,9 @@ export function WhitelistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-red-900 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-full h-full" style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 35px, white 35px, white 37px)',
-        }} />
-        <div className="absolute top-0 left-0 w-full h-full" style={{
-          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 35px, white 35px, white 37px)',
-        }} />
-      </div>
-
-      {/* Hero Image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src={teamPhoto}
-          alt="1980 USA Hockey Team"
-          className="w-full h-full object-cover opacity-30"
-        />
-      </div>
-
-      {/* Privy Connect Button - Top Right */}
-      <div className="absolute top-6 right-6 z-20">
-        {!ready ? (
-          // Loading state while Privy initializes
-          <div className="bg-gray-800/90 backdrop-blur rounded-xl px-6 py-3 text-gray-300 font-medium flex items-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Initializing Privy...
-          </div>
-        ) : !authenticated ? (
-          // Not authenticated - show login button
-          <button
-            onClick={login}
-            className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
-          >
-            <Wallet className="w-5 h-5" />
-            Connect Wallet or Sign In
-          </button>
-        ) : isWaitingForWallet ? (
-          // Brief loading state while wallet connects
-          <div className="bg-gray-800/90 backdrop-blur rounded-xl px-6 py-3 max-w-md">
-            <div className="flex items-center gap-3">
-              <Loader2 className="w-5 h-5 text-yellow-500 animate-spin" />
-              <div className="text-white font-medium text-sm">Loading wallet...</div>
-              <button
-                onClick={() => logout()}
-                className="text-gray-400 hover:text-white text-sm transition-colors whitespace-nowrap"
-              >
-                Disconnect
-              </button>
-            </div>
-          </div>
-        ) : (
-          // Authenticated with wallet - show wallet info and disconnect
-          <div className="flex items-center gap-3 bg-gray-800/90 backdrop-blur rounded-xl px-6 py-3">
-            <div className="flex items-center gap-2">
-              <Wallet className="w-5 h-5 text-yellow-500" />
-              <span className="text-white font-mono text-sm">
-                {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    Loading...
-                  </span>
-                )}
-              </span>
-            </div>
-            {user?.email?.address && (
-              <span className="text-gray-400 text-sm hidden sm:inline">
-                ({user.email.address})
-              </span>
-            )}
-            <button
-              onClick={() => {
-                logout();
-              }}
-              className="text-gray-400 hover:text-white text-sm ml-2 transition-colors"
-            >
-              Disconnect
-            </button>
-          </div>
-        )}
-      </div>
-
+    <>
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 py-20">
+      <div className="min-h-screen flex items-center justify-center p-4 py-8">
         <div className="max-w-2xl w-full">
           {/* Header */}
           <div className="text-center mb-8">
@@ -554,28 +472,11 @@ Join the community preserving the miracle that happened in $1980
             </Link>
           </div>
 
-          {/* Footer Quote */}
-          <div className="mt-8 text-center">
-            <p className="text-white/90 text-lg sm:text-xl font-bold italic drop-shadow-lg">
-              "Do you believe in miracles?"
-            </p>
-            <p className="text-blue-200 text-sm mt-2">
-              February 22, 1980 • Lake Placid, NY
-            </p>
-          </div>
-
-          {/* Company Footer */}
-          <div className="mt-6 pt-4 border-t border-white/20 text-center">
-            <p className="text-white/50 text-sm">
-              © {new Date().getFullYear()} Miracle of 1980 LLC. All rights reserved.
-            </p>
-          </div>
-
         </div>
       </div>
 
       {/* PDF Modal */}
       <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
-    </div>
+    </>
   );
 }

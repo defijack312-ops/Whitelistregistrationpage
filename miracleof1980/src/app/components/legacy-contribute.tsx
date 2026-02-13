@@ -13,7 +13,7 @@ import {
   getAddress,
 } from 'viem';
 import { base } from 'viem/chains';
-import { Wallet, ArrowLeft, Trophy, Star, Shield, Users, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Wallet, Trophy, Star, Shield, Users, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 
 // ============ CONFIG ============
 const CONFIG = {
@@ -437,7 +437,7 @@ export function LegacyContribute() {
   // ============ RENDER ============
   if (!ready) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-900 via-red-800 to-blue-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-white animate-spin" />
       </div>
     );
@@ -446,7 +446,7 @@ export function LegacyContribute() {
   // Password gate
   if (!isUnlocked) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-900 via-red-800 to-blue-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 max-w-sm w-full mx-4 text-center">
           <h2 className="text-2xl font-bold text-white mb-2">🏒 Early Access</h2>
           <p className="text-white/60 text-sm mb-6">Enter the password to access Legacy Contributions</p>
@@ -474,23 +474,8 @@ export function LegacyContribute() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 via-red-800 to-blue-900">
+    <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-8">
-
-        {/* Navigation */}
-        <div className="flex items-center justify-between mb-6">
-          <Link to="/" className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm font-medium">
-            <ArrowLeft className="w-4 h-4" /> Back to Whitelist
-          </Link>
-          {authenticated ? (
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-              <Wallet className="w-4 h-4 text-green-400" />
-              <span className="text-white text-xs font-mono">
-                {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : ''}
-              </span>
-            </div>
-          ) : null}
-        </div>
 
         {/* Hero */}
         <div className="text-center mb-10">
@@ -777,23 +762,6 @@ export function LegacyContribute() {
             </div>
           </div>
         )}
-
-        {/* Footer Quote */}
-        <div className="mt-10 text-center">
-          <p className="text-white/90 text-lg sm:text-xl font-bold italic drop-shadow-lg">
-            "Do you believe in miracles?"
-          </p>
-          <p className="text-blue-200 text-sm mt-2">
-            February 22, 1980 • Lake Placid, NY
-          </p>
-        </div>
-
-        {/* Company Footer */}
-        <div className="mt-6 pt-4 border-t border-white/20 text-center">
-          <p className="text-white/50 text-sm">
-            © {new Date().getFullYear()} Miracle of 1980 LLC. All rights reserved.
-          </p>
-        </div>
 
       </div>
 

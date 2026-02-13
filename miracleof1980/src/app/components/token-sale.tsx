@@ -4,8 +4,7 @@ import { Link } from 'react-router-dom';
 import PDFModal from './pdf-modal';
 import { createPublicClient, http, formatEther, parseEther } from 'viem';
 import { baseSepolia } from 'viem/chains';
-import { Wallet, Loader2, ArrowLeft, ShoppingCart, BarChart3, AlertCircle, CheckCircle2, Info, Coins } from 'lucide-react';
-import teamPhoto from '@/assets/cf45d5f11ac0354a95fb3632c5e2369467e0dfa1.png';
+import { Wallet, Loader2, ShoppingCart, AlertCircle, CheckCircle2, Info, Coins } from 'lucide-react';
 
 // Contract Configuration
 const CONFIG = {
@@ -104,21 +103,8 @@ const publicClient = createPublicClient({
 function ComingSoonPage() {
   const [showPDF, setShowPDF] = useState(false);
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-red-900 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-full h-full" style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 35px, white 35px, white 37px)',
-        }} />
-        <div className="absolute top-0 left-0 w-full h-full" style={{
-          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 35px, white 35px, white 37px)',
-        }} />
-      </div>
-      <div className="absolute inset-0 z-0">
-        <img src={teamPhoto} alt="1980 USA Hockey Team" className="w-full h-full object-cover opacity-30" />
-      </div>
-
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+    <>
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-lg w-full text-center">
           <div className="inline-block mb-6">
             <div className="relative">
@@ -131,25 +117,17 @@ function ComingSoonPage() {
             The official $1980 Miracle on Ice token sale is not yet live. Join the whitelist to be notified when it launches.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link to="/" className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-bold py-3 px-8 rounded-xl transition-all shadow-lg">
+            <Link to="/whitelist" className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-bold py-3 px-8 rounded-xl transition-all shadow-lg">
               Join Whitelist
             </Link>
             <button onClick={() => setShowPDF(true)} className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-8 rounded-xl transition-all border-2 border-white/30 cursor-pointer">
               Read Litepaper
             </button>
           </div>
-
-          <div className="mt-8 text-center">
-            <p className="text-white/90 text-lg font-bold italic drop-shadow-lg">"Do you believe in miracles?"</p>
-            <p className="text-blue-200 text-sm mt-2">February 22, 1980 · Lake Placid, NY</p>
-          </div>
-          <div className="mt-6 pt-4 border-t border-white/20 text-center">
-            <p className="text-white/50 text-sm">© {new Date().getFullYear()} Miracle of 1980 LLC. All rights reserved.</p>
-          </div>
         </div>
       </div>
       <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
-    </div>
+    </>
   );
 }
 
@@ -318,54 +296,9 @@ export function TokenSale() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-red-900 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-full h-full" style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 35px, white 35px, white 37px)',
-        }} />
-        <div className="absolute top-0 left-0 w-full h-full" style={{
-          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 35px, white 35px, white 37px)',
-        }} />
-      </div>
-
-      {/* Hero Image */}
-      <div className="absolute inset-0 z-0">
-        <img src={teamPhoto} alt="1980 USA Hockey Team" className="w-full h-full object-cover opacity-30" />
-      </div>
-
-      {/* Wallet Connect - Top Right */}
-      <div className="absolute top-6 right-6 z-20">
-        {!ready ? (
-          <div className="bg-gray-800/90 backdrop-blur rounded-xl px-6 py-3 text-gray-300 font-medium flex items-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin" /> Initializing...
-          </div>
-        ) : !authenticated ? (
-          <button onClick={login} className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-bold py-3 px-6 rounded-xl transition-all flex items-center gap-2 shadow-lg">
-            <Wallet className="w-5 h-5" /> Connect Wallet
-          </button>
-        ) : (
-          <div className="flex items-center gap-3 bg-gray-800/90 backdrop-blur rounded-xl px-6 py-3">
-            <Wallet className="w-5 h-5 text-yellow-500" />
-            <span className="text-white font-mono text-sm">
-              {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Loading...'}
-            </span>
-            <button onClick={() => logout()} className="text-gray-400 hover:text-white text-sm ml-2 transition-colors">
-              Disconnect
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Back to Whitelist - Top Left */}
-      <div className="absolute top-6 left-6 z-20">
-        <Link to="/" className="flex items-center gap-2 bg-gray-800/90 backdrop-blur rounded-xl px-4 py-3 text-gray-300 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to Whitelist
-        </Link>
-      </div>
-
+    <>
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 py-24">
+      <div className="min-h-screen flex items-center justify-center p-4 py-8">
         <div className="max-w-2xl w-full">
 
           {/* Header */}
@@ -527,44 +460,11 @@ export function TokenSale() {
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <div className="mt-6 space-y-3">
-            <button
-              onClick={() => setShowPDF(true)}
-              className="w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-xl transition-all border-2 border-white/30 flex items-center justify-center gap-2"
-            >
-              📄 Read the Litepaper
-            </button>
-            <Link
-              to="/contribute"
-              className="w-full py-3 rounded-xl border-2 border-yellow-400/50 text-yellow-300 font-bold text-sm hover:bg-yellow-500/10 transition-all flex items-center justify-center gap-2"
-            >
-              🏒 Legacy Contributions
-            </Link>
-            <Link
-              to="/"
-              className="w-full py-3 rounded-xl border-2 border-white/20 text-white/70 font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
-            >
-              Whitelist Registration
-            </Link>
-          </div>
-
-          {/* Footer Quote */}
-          <div className="mt-8 text-center">
-            <p className="text-white/90 text-lg sm:text-xl font-bold italic drop-shadow-lg">"Do you believe in miracles?"</p>
-            <p className="text-blue-200 text-sm mt-2">February 22, 1980 · Lake Placid, NY</p>
-          </div>
-
-          {/* Company Footer */}
-          <div className="mt-6 pt-4 border-t border-white/20 text-center">
-            <p className="text-white/50 text-sm">© {new Date().getFullYear()} Miracle of 1980 LLC. All rights reserved.</p>
-          </div>
-
         </div>
       </div>
 
       {/* PDF Modal */}
       <PDFModal isOpen={showPDF} onClose={() => setShowPDF(false)} />
-    </div>
+    </>
   );
 }
