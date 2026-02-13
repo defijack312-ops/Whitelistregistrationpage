@@ -53,7 +53,7 @@ export function Navbar() {
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-1">
             <Link to="/" className={navLinkClass(isActive('/') && !location.hash)}>Home</Link>
-            <Link to="/#about" className={navLinkClass(isHashActive('#about'))}>About</Link>
+            <Link to="/about" className={navLinkClass(isActive('/about'))}>About</Link>
             <Link to="/roadmap" className={navLinkClass(isActive('/roadmap'))}>Litepaper</Link>
             <Link to="/#tokenomics" className={navLinkClass(isHashActive('#tokenomics'))}>Tokenomics</Link>
 
@@ -118,7 +118,7 @@ export function Navbar() {
         <div className="lg:hidden bg-gray-900/95 backdrop-blur-lg border-t border-white/10">
           <div className="px-4 py-3 space-y-1">
             <Link to="/" className={`block ${navLinkClass(isActive('/') && !location.hash)}`}>Home</Link>
-            <Link to="/#about" className={`block ${navLinkClass(false)}`}>About</Link>
+            <Link to="/about" className={`block ${navLinkClass(isActive('/about'))}`}>About</Link>
             <Link to="/roadmap" className={`block ${navLinkClass(isActive('/roadmap'))}`}>Litepaper</Link>
             <Link to="/#tokenomics" className={`block ${navLinkClass(false)}`}>Tokenomics</Link>
             <div className="text-xs text-white/40 uppercase tracking-wider px-3 pt-3 pb-1">Whitelist</div>

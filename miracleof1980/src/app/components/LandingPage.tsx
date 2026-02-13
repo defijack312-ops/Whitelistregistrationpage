@@ -67,7 +67,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* About Section */}
+      {/* About Section — Teaser */}
       <section id="about" className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -78,18 +78,13 @@ export function LandingPage() {
           <div className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 sm:p-10 border-2 border-blue-600/30">
             <p className="text-gray-700 text-lg leading-relaxed mb-6">
               On February 22, 1980, a group of college kids did the impossible — they defeated the
-              Soviet Union's legendary hockey team at the Winter Olympics in Lake Placid. It wasn't
-              just a game. It was a moment that united a nation and proved that belief can overcome
-              any odds.
-            </p>
-            <p className="text-gray-700 text-lg leading-relaxed mb-6">
-              The <strong>$1980 MIRACLE</strong> token commemorates this legacy by building a
-              community-governed ecosystem dedicated to preserving and extending the cultural impact
-              of the 1980 Olympic team. This is not an investment vehicle — it's a tribute built on
-              blockchain technology to ensure the miracle lives on.
+              Soviet Union's legendary hockey team at the Winter Olympics in Lake Placid. The
+              <strong> $1980 MIRACLE</strong> token commemorates this legacy by building a
+              community-governed ecosystem to preserve and extend the cultural impact of that
+              historic moment — forever on-chain.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
               <div className="bg-blue-50 rounded-xl p-5 text-center border border-blue-200">
                 <Shield className="w-8 h-8 text-blue-600 mx-auto mb-3" />
                 <h4 className="font-bold text-gray-900 mb-1">Legacy Preservation</h4>
@@ -105,6 +100,12 @@ export function LandingPage() {
                 <h4 className="font-bold text-gray-900 mb-1">On-Chain Forever</h4>
                 <p className="text-sm text-gray-600">Built on Base blockchain with transparent operations</p>
               </div>
+            </div>
+
+            <div className="text-center">
+              <Link to="/about" className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg">
+                Learn More About the Project <ArrowRight className="w-5 h-5" />
+              </Link>
             </div>
           </div>
         </div>
