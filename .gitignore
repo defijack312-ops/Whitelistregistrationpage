@@ -1,26 +1,10 @@
-# Dependencies
-node_modules/
+# Ignore everything at the root level
+/*
 
-# Build output
-dist/
-build/
+# Except the project directory and this gitignore
+!/miracleof1980/
+!.gitignore
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# IDE
-.vscode/
-.idea/
-
-# OS
+# Always ignore these everywhere
 .DS_Store
-Thumbs.db
-
-# Logs
 *.log
-npm-debug.log*
-
-# Supabase
-.supabase/

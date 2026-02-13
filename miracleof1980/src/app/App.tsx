@@ -41,7 +41,7 @@ export default function App() {
         },
         loginMethods,
         embeddedWallets: {
-          createOnLogin: 'all-users',
+          createOnLogin: 'users-without-wallets',
         },
         defaultChain: base,
         supportedChains: [base],

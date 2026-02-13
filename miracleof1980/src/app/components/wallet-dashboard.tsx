@@ -158,8 +158,11 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   const [swapError, setSwapError] = useState<string | null>(null);
   const [slippage, setSlippage] = useState(5); // Default 5% slippage
 
-  const address = wallets[0]?.address;
+  const externalWallet = wallets.find(wallet => wallet.walletClientType !== 'privy');
   const embeddedWallet = wallets.find(wallet => wallet.walletClientType === 'privy');
+  const activeWallet = externalWallet || embeddedWallet || wallets[0];
+  const address = activeWallet?.address;
+  const isEmbeddedWallet = activeWallet?.walletClientType === 'privy';
   const displayEmail = userEmail || user?.email?.address;
   const isConfirmed = status === 'confirmed';
   const privyTwitter = user?.twitter;
@@ -370,12 +373,12 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
   };
 
   const handleSwap = async () => {
-    if (!embeddedWallet || !swapAmount || parseFloat(swapAmount) <= 0 || !estimatedMerc || !address) return;
+    if (!activeWallet || !swapAmount || parseFloat(swapAmount) <= 0 || !estimatedMerc || !address) return;
     setIsSwapping(true);
     setSwapError(null);
     
     try {
-      const provider = await embeddedWallet.getEthereumProvider();
+      const provider = await activeWallet.getEthereumProvider();
       const decimals = inputToken === 'ETH' ? 18 : USDC_DECIMALS;
       const amountInWei = BigInt(Math.floor(parseFloat(swapAmount) * (10 ** decimals)));
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
@@ -515,7 +518,8 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                 </a>
               </div>
 
-              {/* Fund Wallet */}
+              {/* Fund Wallet - Only show for embedded (Privy) wallets */}
+              {isEmbeddedWallet && (
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-blue-200">
                 <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-blue-600" /> Fund Your Wallet
@@ -525,6 +529,7 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                   <CreditCard className="w-4 h-4" /> Buy ETH with Card
                 </button>
               </div>
+              )}
 
               {/* MERC Swap Section */}
               <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-2 border-yellow-400">
@@ -700,13 +705,17 @@ export function WalletDashboard({ userEmail, registrationDate, status = 'pending
                 </div>
               )}
 
-              {/* Security */}
+              {/* Security - Only show export for embedded wallets */}
               <div className="pt-4 border-t border-gray-200">
+                {isEmbeddedWallet && (
+                <>
                 <h4 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2"><Shield className="w-5 h-5 text-blue-600" /> Wallet Security</h4>
                 <p className="text-sm text-gray-600 mb-4">Export your private key to back up your wallet.<strong className="text-red-600"> Never share your private key!</strong></p>
                 <button onClick={handleExportWallet} disabled={isExporting} className="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 disabled:opacity-50 text-black font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
                   <Key className="w-5 h-5" /> {isExporting ? 'Opening Export...' : 'Export Private Key'}
                 </button>
+                </>
+                )}
                 <button onClick={() => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent("I just registered for the $1980 whitelist! 🏒🇺🇸 #DoYouBelieveInMiracles?")}`, "_blank"); }} className="w-full mt-3 bg-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
                   <Twitter className="w-5 h-5" /> Share on X
                 </button>

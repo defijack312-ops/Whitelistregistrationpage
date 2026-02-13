@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useForm } from 'react-hook-form';
 import { Twitter, Mail, Wallet, CheckCircle2, Loader2 } from 'lucide-react';
@@ -32,7 +32,7 @@ const STORAGE_KEY = 'miracle_whitelist_access';
 
 export function WhitelistPage() {
   // Privy hooks
-  const { login, logout, authenticated, ready, user, createWallet } = usePrivy();
+  const { login, logout, authenticated, ready, user } = usePrivy();
   const { wallets } = useWallets();
 
   // Registration status
@@ -72,30 +72,14 @@ export function WhitelistPage() {
     }
   };
   
-  // Derived wallet state
-  const address = wallets[0]?.address;
+  // Derived wallet state - prefer external wallets over embedded
+  const externalWallet = wallets.find(w => w.walletClientType !== 'privy');
+  const address = externalWallet?.address || wallets[0]?.address;
   const isConnected = authenticated && wallets.length > 0 && !!address;
   
   // Check if we're waiting for wallet to be created (authenticated but no address yet)
   const isWaitingForWallet = authenticated && !address;
   
-  // State to track how long we've been waiting
-  const [waitingDuration, setWaitingDuration] = useState(0);
-  const [skipWalletCreation, setSkipWalletCreation] = useState(false);
-  const walletCreationAttemptedRef = useRef(false);
-  const [isRetrying, setIsRetrying] = useState(false);
-  
-  // Track waiting duration
-  useEffect(() => {
-    if (isWaitingForWallet && !skipWalletCreation) {
-      const interval = setInterval(() => {
-        setWaitingDuration(prev => prev + 1);
-      }, 1000);
-      return () => clearInterval(interval);
-    } else {
-      setWaitingDuration(0);
-    }
-  }, [isWaitingForWallet, skipWalletCreation]);
 
   const [submitted, setSubmitted] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
@@ -190,44 +174,6 @@ export function WhitelistPage() {
   }, [user, setValue]);
 
   // Auto-create wallet for users without one
-  useEffect(() => {
-    const autoCreateWallet = async () => {
-      // If user is authenticated, ready, and has no wallet
-      if (authenticated && ready && wallets.length === 0 && !skipWalletCreation && !walletCreationAttemptedRef.current) {
-        console.log('No wallet found. Checking if createWallet is available...');
-        
-        // Mark that we've attempted creation to prevent duplicates
-        walletCreationAttemptedRef.current = true;
-        
-        // Check if createWallet method exists
-        if (!createWallet) {
-          console.warn('createWallet method not available in this Privy version');
-          console.log('Embedded wallets should auto-create. If stuck, please check Privy dashboard settings.');
-          // After 10 seconds, auto-skip if still no wallet
-          setTimeout(() => {
-            if (wallets.length === 0) {
-              console.log('No wallet created after 10s, enabling manual entry');
-              setSkipWalletCreation(true);
-            }
-          }, 10000);
-          return;
-        }
-        
-        console.log('Attempting to create embedded wallet...');
-        try {
-          await createWallet();
-          console.log('Wallet creation initiated');
-        } catch (error) {
-          console.error('Error creating wallet:', error);
-          // Auto-skip if wallet creation fails
-          setTimeout(() => setSkipWalletCreation(true), 2000);
-        }
-      }
-    };
-
-    autoCreateWallet();
-  }, [authenticated, ready, wallets.length, skipWalletCreation, createWallet]);
-
   // Debug logging for wallet status
   useEffect(() => {
     if (authenticated) {
@@ -239,13 +185,10 @@ export function WhitelistPage() {
         hasAddress: !!address,
         userEmail: user?.email?.address,
         loginMethod: user?.linkedAccounts?.[0]?.type,
-        hasCreateWallet: !!createWallet,
-        creationAttempted: walletCreationAttemptedRef.current,
-        skipWalletCreation,
         registrationStatus,
       });
     }
-  }, [authenticated, ready, wallets.length, address, user, createWallet, skipWalletCreation, registrationStatus]);
+  }, [authenticated, ready, wallets.length, address, user, registrationStatus]);
 
   const handlePasscodeSuccess = (code: string) => {
     setHasAccess(true);
@@ -410,65 +353,19 @@ export function WhitelistPage() {
             <Wallet className="w-5 h-5" />
             Connect Wallet or Sign In
           </button>
-        ) : isWaitingForWallet && !skipWalletCreation ? (
-          // Waiting for wallet to be created (social login users)
+        ) : isWaitingForWallet ? (
+          // Brief loading state while wallet connects
           <div className="bg-gray-800/90 backdrop-blur rounded-xl px-6 py-3 max-w-md">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3">
               <Loader2 className="w-5 h-5 text-yellow-500 animate-spin" />
-              <div className="flex-1">
-                <div className="text-white font-medium text-sm">Creating your wallet...</div>
-                <div className="text-gray-400 text-xs">
-                  {waitingDuration > 10 ? 'Still working on it...' : 'This may take a moment'}
-                </div>
-              </div>
+              <div className="text-white font-medium text-sm">Loading wallet...</div>
               <button
-                onClick={() => {
-                  walletCreationAttemptedRef.current = false;
-                  setSkipWalletCreation(false);
-                  logout();
-                }}
+                onClick={() => logout()}
                 className="text-gray-400 hover:text-white text-sm transition-colors whitespace-nowrap"
               >
                 Disconnect
               </button>
             </div>
-            {waitingDuration > 3 && (
-              <div className="flex gap-2 mt-3 pt-3 border-t border-gray-600">
-                <button
-                  onClick={async () => {
-                    if (isRetrying) return; // Prevent spam clicking
-                    
-                    if (createWallet) {
-                      try {
-                        setIsRetrying(true);
-                        console.log('Manually triggering wallet creation...');
-                        walletCreationAttemptedRef.current = false; // Reset flag for manual retry
-                        await createWallet();
-                        // Keep disabled for 2 seconds to prevent rapid re-clicks
-                        setTimeout(() => setIsRetrying(false), 2000);
-                      } catch (error) {
-                        console.error('Manual wallet creation failed:', error);
-                        setIsRetrying(false);
-                        setSkipWalletCreation(true);
-                      }
-                    } else {
-                      setSkipWalletCreation(true);
-                    }
-                  }}
-                  disabled={isRetrying}
-                  className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:cursor-not-allowed text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-                >
-                  {isRetrying && <Loader2 className="w-3 h-3 animate-spin" />}
-                  {isRetrying ? 'Creating...' : (createWallet ? 'Retry Creation' : 'Continue')}
-                </button>
-                <button
-                  onClick={() => setSkipWalletCreation(true)}
-                  className="flex-1 bg-yellow-600 hover:bg-yellow-500 text-black text-xs font-bold py-2 px-3 rounded-lg transition-colors"
-                >
-                  Skip - Enter Manually
-                </button>
-              </div>
-            )}
           </div>
         ) : (
           // Authenticated with wallet - show wallet info and disconnect
@@ -491,8 +388,6 @@ export function WhitelistPage() {
             )}
             <button
               onClick={() => {
-                walletCreationAttemptedRef.current = false;
-                setSkipWalletCreation(false);
                 logout();
               }}
               className="text-gray-400 hover:text-white text-sm ml-2 transition-colors"
@@ -539,19 +434,11 @@ Join the community preserving the miracle that happened in $1980
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Info banner for social login users without wallet */}
-              {authenticated && !address && !skipWalletCreation && (
-                <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <Loader2 className="w-5 h-5 text-yellow-600 animate-spin mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-bold text-yellow-900 text-sm mb-1">Wallet Setup in Progress</h4>
-                      <p className="text-yellow-800 text-xs mb-2">
-                        We're creating your Base wallet automatically. This usually takes a few seconds.
-                      </p>
-                      <p className="text-yellow-700 text-xs">
-                        💡 <strong>Tip:</strong> You can click "Skip - Enter Manually" in the top-right corner to proceed immediately and enter your wallet address manually.
-                      </p>
-                    </div>
+              {authenticated && !address && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="w-5 h-5 text-blue-600 animate-spin flex-shrink-0" />
+                    <p className="text-blue-800 text-sm">Loading wallet...</p>
                   </div>
                 </div>
               )}
