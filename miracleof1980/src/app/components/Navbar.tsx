@@ -63,28 +63,6 @@ export function Navbar() {
             <Link to="/whitepaper" className={navLinkClass(isActive('/whitepaper'))}>Whitepaper</Link>
             <Link to="/tokenomics" className={navLinkClass(isActive('/tokenomics'))}>Tokenomics</Link>
 
-            {/* Whitelist Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setWhitelistOpen(!whitelistOpen)}
-                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1 ${
-                  isActive('/whitelist') || isActive('/dashboard') ? 'text-yellow-400 bg-white/10' : 'text-white/80 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                Whitelist <ChevronDown className={`w-3.5 h-3.5 transition-transform ${whitelistOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {whitelistOpen && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-gray-900/95 backdrop-blur-lg rounded-xl border border-white/10 shadow-2xl overflow-hidden">
-                  <Link to="/whitelist" className="block px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors">
-                    Register
-                  </Link>
-                  <Link to="/dashboard" className="block px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors border-t border-white/5">
-                    Manage Wallet
-                  </Link>
-                </div>
-              )}
-            </div>
-
             {/* Token & SBT Dropdown */}
             <div className="relative" ref={tokenSbtRef}>
               <button
@@ -102,6 +80,28 @@ export function Navbar() {
                   </Link>
                   <Link to="/contribute" className="block px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors border-t border-white/5">
                     Legacy SBT Mint
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Whitelist Dropdown — pushed right */}
+            <div className="relative ml-auto" ref={dropdownRef}>
+              <button
+                onClick={() => setWhitelistOpen(!whitelistOpen)}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1 ${
+                  isActive('/whitelist') || isActive('/dashboard') ? 'text-yellow-400 bg-white/10' : 'text-white/80 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                Whitelist <ChevronDown className={`w-3.5 h-3.5 transition-transform ${whitelistOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {whitelistOpen && (
+                <div className="absolute top-full right-0 mt-1 w-48 bg-gray-900/95 backdrop-blur-lg rounded-xl border border-white/10 shadow-2xl overflow-hidden">
+                  <Link to="/whitelist" className="block px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors">
+                    Register
+                  </Link>
+                  <Link to="/dashboard" className="block px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors border-t border-white/5">
+                    Manage Wallet
                   </Link>
                 </div>
               )}
@@ -146,12 +146,12 @@ export function Navbar() {
             <Link to="/about" className={`block ${navLinkClass(isActive('/about'))}`}>About</Link>
             <Link to="/whitepaper" className={`block ${navLinkClass(isActive('/whitepaper'))}`}>Whitepaper</Link>
             <Link to="/tokenomics" className={`block ${navLinkClass(isActive('/tokenomics'))}`}>Tokenomics</Link>
-            <div className="text-xs text-white/40 uppercase tracking-wider px-3 pt-3 pb-1">Whitelist</div>
-            <Link to="/whitelist" className={`block ${navLinkClass(isActive('/whitelist'))} pl-6`}>Register</Link>
-            <Link to="/dashboard" className={`block ${navLinkClass(isActive('/dashboard'))} pl-6`}>Manage Wallet</Link>
             <div className="text-xs text-white/40 uppercase tracking-wider px-3 pt-3 pb-1">Token & SBT</div>
             <Link to="/sale" className={`block ${navLinkClass(isActive('/sale'))} pl-6`}>$1980 Sale</Link>
             <Link to="/contribute" className={`block ${navLinkClass(isActive('/contribute'))} pl-6`}>Legacy SBT Mint</Link>
+            <div className="text-xs text-white/40 uppercase tracking-wider px-3 pt-3 pb-1">Whitelist</div>
+            <Link to="/whitelist" className={`block ${navLinkClass(isActive('/whitelist'))} pl-6`}>Register</Link>
+            <Link to="/dashboard" className={`block ${navLinkClass(isActive('/dashboard'))} pl-6`}>Manage Wallet</Link>
 
             {/* Mobile Wallet */}
             <div className="pt-3 border-t border-white/10">
